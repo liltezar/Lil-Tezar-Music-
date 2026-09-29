@@ -33,25 +33,12 @@
       height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      margin-bottom: 15px;
       border: 3px solid #ff1a1a;
     }
 
-    .name {
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .role {
-      color: #aaa;
-      margin: 5px 0;
-    }
-
-    .bio {
-      margin: 10px 0;
-      font-size: 14px;
-      color: #ccc;
-    }
+    .name { font-size: 22px; font-weight: bold; }
+    .role { color: #aaa; }
+    .bio { font-size: 14px; color: #ccc; margin-top: 8px; }
 
     .subscribe-btn {
       display: inline-block;
@@ -64,13 +51,7 @@
       font-weight: bold;
     }
 
-    .subscribe-btn:hover {
-      box-shadow: 0 0 10px red;
-    }
-
-    .section {
-      margin: 20px;
-    }
+    .section { margin: 20px; }
 
     .song {
       display: flex;
@@ -88,13 +69,28 @@
       margin-right: 10px;
     }
 
-    .title {
-      font-weight: bold;
+    .title { font-weight: bold; }
+    .artist { font-size: 13px; color: #aaa; }
+
+    .buttons button {
+      margin-right: 5px;
+      background: #333;
+      color: white;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 8px;
+      cursor: pointer;
     }
 
-    .artist {
-      font-size: 13px;
-      color: #aaa;
+    /* Player */
+    #player {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #111;
+      padding: 10px;
+      display: none;
     }
   </style>
 </head>
@@ -108,30 +104,95 @@
 
   <!-- PROFILE -->
   <div class="profile">
-    
-    <!-- 🔥 YOUR REAL IMAGE -->
     <img src="your-profile.jpg" alt="Lil Tezar">
 
     <div class="name">LIL TEZAR ✔</div>
     <div class="role">Artist • Songwriter</div>
 
-    <div class="bio">
-      Real pain. Real stories. No fake love.
-    </div>
+    <div class="bio">Real pain. Real stories. No fake love.</div>
 
-    <!-- 🔥 YOUTUBE SUBSCRIBE BUTTON -->
     <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank" class="subscribe-btn">
       ▶ Subscribe
     </a>
-
   </div>
 
-  <!-- MUSIC SECTION -->
+  <!-- MUSIC -->
   <div class="section">
     <h2>Latest Music</h2>
-
-    <div id="songs"></div>
+    <div id="songs">Loading...</div>
   </div>
+
+  <!-- AUDIO PLAYER -->
+  <div id="player">
+    <audio id="audio" controls></audio>
+  </div>
+
+<script>
+const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
+const SUPABASE_KEY = "sb_publishable_7zCr4dg-xaj7I7syGO685g_Fk_fIbFS";
+
+const songsDiv = document.getElementById("songs");
+const audio = document.getElementById("audio");
+const player = document.getElementById("player");
+
+/* LOAD SONGS */
+async function loadSongs() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+      }
+    });
+
+    const songs = await res.json();
+    songsDiv.innerHTML = "";
+
+    if (!songs.length) {
+      songsDiv.innerHTML = "No songs found.";
+      return;
+    }
+
+    songs.forEach(song => {
+      const el = document.createElement("div");
+      el.className = "song";
+
+      el.innerHTML = `
+        <img src="${song.cover_url || 'https://via.placeholder.com/70'}">
+        <div>
+          <div class="title">${song.title}</div>
+          <div class="artist">${song.artist}</div>
+
+          <div class="buttons">
+            <button>▶ Play</button>
+            <button>⬇ Download</button>
+          </div>
+        </div>
+      `;
+
+      const [playBtn, downloadBtn] = el.querySelectorAll("button");
+
+      playBtn.onclick = () => {
+        audio.src = song.audio_url;
+        player.style.display = "block";
+        audio.play();
+      };
+
+      downloadBtn.onclick = () => {
+        window.open(song.audio_url, "_blank");
+      };
+
+      songsDiv.appendChild(el);
+    });
+
+  } catch (err) {
+    songsDiv.innerHTML = "⚠️ Offline or Supabase error";
+    console.log(err);
+  }
+}
+
+loadSongs();
+</script>
 
 </body>
 </html>

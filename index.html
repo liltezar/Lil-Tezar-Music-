@@ -1,266 +1,196 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Lil Tezar Music</title>
 
-  <meta name="theme-color" content="#0b0b0b">
-
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
       background: #0b0b0b;
       color: white;
     }
 
-    header {
-      padding: 20px;
+    .header {
       text-align: center;
-      background: #111;
-      border-bottom: 1px solid #222;
+      padding: 20px;
     }
 
-    header p { font-size: 13px; color: #888; }
-
-    .container {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px 15px 120px;
-    }
-
-    .artist-profile {
-      background: linear-gradient(145deg, #191919, #101010);
+    .profile {
+      background: #1a1a1a;
+      margin: 15px;
       border-radius: 20px;
       padding: 20px;
       text-align: center;
-      margin-bottom: 25px;
+      box-shadow: 0 0 20px rgba(255,0,0,0.2);
     }
 
-    .artist-avatar {
-      width: 110px;
-      height: 110px;
+    .profile img {
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #333, #111);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      font-weight: bold;
-      margin: auto;
+      object-fit: cover;
+      margin-bottom: 15px;
+      border: 3px solid #ff1a1a;
     }
 
-    .verified { color: #4da6ff; }
+    .name {
+      font-size: 22px;
+      font-weight: bold;
+    }
 
-    .artist-role { color: #999; font-size: 13px; margin-top: 5px; }
+    .role {
+      color: #aaa;
+      margin: 5px 0;
+    }
 
-    .bio { color: #bbb; font-size: 14px; margin: 10px 0; }
+    .bio {
+      margin: 10px 0;
+      font-size: 14px;
+      color: #ccc;
+    }
 
-    .follow-btn {
-      background: white;
-      color: black;
-      border: none;
+    .subscribe-btn {
+      display: inline-block;
+      margin-top: 15px;
       padding: 10px 20px;
-      border-radius: 20px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .following {
-      background: #292929;
+      background: red;
       color: white;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: bold;
     }
 
-    .status {
-      font-size: 12px;
-      margin-top: 10px;
-      color: #888;
+    .subscribe-btn:hover {
+      box-shadow: 0 0 10px red;
+    }
+
+    .section {
+      margin: 20px;
     }
 
     .song {
-      background: #151515;
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 12px;
       display: flex;
-      gap: 10px;
       align-items: center;
-    }
-
-    .cover {
-      width: 70px;
-      height: 70px;
-      border-radius: 10px;
-      object-fit: cover;
-      background: #222;
-    }
-
-    .info { flex: 1; }
-
-    .title { font-size: 15px; font-weight: bold; }
-
-    .artist { font-size: 13px; color: #aaa; }
-
-    .buttons { margin-top: 5px; }
-
-    button {
-      border: none;
-      padding: 7px 12px;
-      border-radius: 15px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .play { background: white; color: black; }
-    .download { background: #292929; color: white; }
-
-    .player {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #151515;
+      background: #1f1f1f;
       padding: 10px;
-      border-top: 1px solid #333;
-      display: none;
+      border-radius: 15px;
+      margin-bottom: 10px;
     }
 
-    audio { width: 100%; }
+    .song img {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      margin-right: 10px;
+    }
 
-    .social { text-align: center; margin-top: 20px; }
+    .title {
+      font-weight: bold;
+    }
 
-    .social a {
-      color: #aaa;
-      margin: 5px;
-      text-decoration: none;
+    .artist {
       font-size: 13px;
+      color: #aaa;
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <h1>🎵 LIL TEZAR</h1>
-  <p>Music • Stories • Vibes</p>
-</header>
-
-<div class="container">
-
-  <section class="artist-profile">
-    <div class="artist-avatar">LT</div>
-
-    <h2>LIL TEZAR <span class="verified">✔</span></h2>
-
-    <div class="artist-role">Artist • Songwriter</div>
-
-    <p class="bio">Real pain. Real stories. No fake love.</p>
-
-    <button class="follow-btn" id="followBtn">Follow</button>
-
-    <div class="status" id="status">Checking...</div>
-  </section>
-
-  <h2>Latest Music</h2>
-
-  <div id="songs">Loading...</div>
-
-  <div class="social">
-    <h3>Connect</h3>
-    <a href="#">TikTok</a>
-    <a href="#">YouTube</a>
-    <a href="#">Instagram</a>
+  <div class="header">
+    <h1>🎵 LIL TEZAR</h1>
+    <p>Music • Stories • Vibes</p>
   </div>
 
-</div>
+  <!-- PROFILE -->
+  <div class="profile">
+    
+    <!-- 🔥 YOUR REAL IMAGE -->
+    <img src="your-profile.jpg" alt="Lil Tezar">
 
-<div class="player" id="player">
-  <audio id="audio" controls></audio>
-</div>
+    <div class="name">LIL TEZAR ✔</div>
+    <div class="role">Artist • Songwriter</div>
 
-<script>
-const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
-const SUPABASE_KEY = "sb_publishable_7zCr4dg-xaj7I7syGO685g_Fk_fIbFS";
+    <div class="bio">
+      Real pain. Real stories. No fake love.
+    </div>
 
-const songsDiv = document.getElementById("songs");
-const audio = document.getElementById("audio");
-const player = document.getElementById("player");
-const statusText = document.getElementById("status");
-const followBtn = document.getElementById("followBtn");
+    <!-- 🔥 YOUTUBE SUBSCRIBE BUTTON -->
+    <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank" class="subscribe-btn">
+      ▶ Subscribe
+    </a>
 
-/* FOLLOW BUTTON */
-followBtn.onclick = () => {
-  followBtn.classList.toggle("following");
-  followBtn.textContent = followBtn.classList.contains("following")
-    ? "✓ Following"
-    : "Follow";
-};
+  </div>
 
-/* ONLINE STATUS */
-function updateStatus() {
-  statusText.textContent = navigator.onLine ? "🟢 Online" : "🔴 Offline";
-}
-window.addEventListener("online", updateStatus);
-window.addEventListener("offline", updateStatus);
-updateStatus();
+  <!-- MUSIC SECTION -->
+  <div class="section">
+    <h2>Latest Music</h2>
 
-/* LOAD SONGS */
-async function loadSongs() {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
-      }
-    });
-
-    const songs = await res.json();
-    songsDiv.innerHTML = "";
-
-    songs.forEach(song => {
-      const el = document.createElement("div");
-      el.className = "song";
-
-      el.innerHTML = `
-        <img class="cover" src="${song.cover_url || 'https://via.placeholder.com/70'}">
-        <div class="info">
-          <div class="title">${song.title}</div>
-          <div class="artist">${song.artist}</div>
-          <div class="buttons">
-            <button class="play">▶</button>
-            <button class="download">⬇</button>
-          </div>
-        </div>
-      `;
-
-      el.querySelector(".play").onclick = () => {
-        audio.src = song.audio_url;
-        player.style.display = "block";
-        audio.play();
-      };
-
-      el.querySelector(".download").onclick = () => {
-        window.open(song.audio_url);
-      };
-
-      songsDiv.appendChild(el);
-    });
-
-  } catch {
-    songsDiv.innerHTML = "⚠️ Offline: Songs unavailable";
-  }
-}
-
-loadSongs();
-
-/* SERVICE WORKER */
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js");
-}
-</script>
+    <div id="songs"></div>
+  </div>
 
 </body>
 </html>
+
+
+---
+
+🔥 WHAT YOU NEED TO CHANGE
+
+👉 1. Replace profile image
+
+In this line:
+
+<img src="your-profile.jpg">
+
+👉 Change to:
+
+<img src="your-image-link-here">
+
+OR upload your pic to GitHub and use:
+
+<img src="profile.jpg">
+
+
+---
+
+👉 2. Your YouTube link (already added)
+
+This is your subscribe button:
+
+https://www.youtube.com/@LILTEZAR-artist
+
+
+---
+
+💥 RESULT
+
+Now your app will have:
+
+🔥 Real artist profile (with your face)
+
+🔴 YouTube Subscribe button
+
+🎧 Clean music layout
+
+💯 Professional look
+
+
+
+---
+
+🚀 NEXT STEP (IMPORTANT)
+
+Tell me:
+
+👉 “”
+👉 OR
+👉 “Add player UI to this”
+
+I’ll merge this with your existing system so:
+
+🔥 Songs + Player + Profile = FULL APP 💯Connect Supabase songs to this

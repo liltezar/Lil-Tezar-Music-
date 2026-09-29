@@ -4,18 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- APP LOOK -->
-  <meta name="theme-color" content="#0b0b0b">
-
   <title>Lil Tezar Music</title>
 
+  <meta name="theme-color" content="#0b0b0b">
+
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: Arial, sans-serif;
@@ -30,22 +24,13 @@
       border-bottom: 1px solid #222;
     }
 
-    header h1 {
-      font-size: 22px;
-    }
-
-    header p {
-      font-size: 13px;
-      color: #888;
-    }
+    header p { font-size: 13px; color: #888; }
 
     .container {
       max-width: 600px;
       margin: auto;
       padding: 20px 15px 120px;
     }
-
-    /* PROFILE */
 
     .artist-profile {
       background: linear-gradient(145deg, #191919, #101010);
@@ -68,22 +53,11 @@
       margin: auto;
     }
 
-    .verified {
-      color: #4da6ff;
-      font-size: 14px;
-    }
+    .verified { color: #4da6ff; }
 
-    .artist-role {
-      color: #999;
-      font-size: 13px;
-      margin-top: 5px;
-    }
+    .artist-role { color: #999; font-size: 13px; margin-top: 5px; }
 
-    .bio {
-      color: #bbb;
-      font-size: 14px;
-      margin: 10px 0;
-    }
+    .bio { color: #bbb; font-size: 14px; margin: 10px 0; }
 
     .follow-btn {
       background: white;
@@ -95,7 +69,16 @@
       cursor: pointer;
     }
 
-    /* MUSIC */
+    .following {
+      background: #292929;
+      color: white;
+    }
+
+    .status {
+      font-size: 12px;
+      margin-top: 10px;
+      color: #888;
+    }
 
     .song {
       background: #151515;
@@ -111,26 +94,17 @@
       width: 70px;
       height: 70px;
       border-radius: 10px;
+      object-fit: cover;
       background: #222;
     }
 
-    .info {
-      flex: 1;
-    }
+    .info { flex: 1; }
 
-    .title {
-      font-size: 15px;
-      font-weight: bold;
-    }
+    .title { font-size: 15px; font-weight: bold; }
 
-    .artist {
-      font-size: 13px;
-      color: #aaa;
-    }
+    .artist { font-size: 13px; color: #aaa; }
 
-    .buttons {
-      margin-top: 5px;
-    }
+    .buttons { margin-top: 5px; }
 
     button {
       border: none;
@@ -140,17 +114,8 @@
       cursor: pointer;
     }
 
-    .play {
-      background: white;
-      color: black;
-    }
-
-    .download {
-      background: #292929;
-      color: white;
-    }
-
-    /* PLAYER */
+    .play { background: white; color: black; }
+    .download { background: #292929; color: white; }
 
     .player {
       position: fixed;
@@ -163,25 +128,9 @@
       display: none;
     }
 
-    audio {
-      width: 100%;
-    }
+    audio { width: 100%; }
 
-    /* STATUS */
-
-    .status {
-      text-align: center;
-      font-size: 12px;
-      color: #888;
-      margin-top: 10px;
-    }
-
-    /* SOCIAL */
-
-    .social {
-      text-align: center;
-      margin-top: 20px;
-    }
+    .social { text-align: center; margin-top: 20px; }
 
     .social a {
       color: #aaa;
@@ -208,15 +157,11 @@
 
     <div class="artist-role">Artist • Songwriter</div>
 
-    <p class="bio">
-      Real pain. Real stories. No fake love.
-    </p>
+    <p class="bio">Real pain. Real stories. No fake love.</p>
 
-    <a href="https://push.fm/fl/D4UbsKin" target="_blank">
-      <button class="follow-btn">Follow</button>
-    </a>
+    <button class="follow-btn" id="followBtn">Follow</button>
 
-    <div class="status" id="status">Checking connection...</div>
+    <div class="status" id="status">Checking...</div>
   </section>
 
   <h2>Latest Music</h2>
@@ -244,16 +189,20 @@ const songsDiv = document.getElementById("songs");
 const audio = document.getElementById("audio");
 const player = document.getElementById("player");
 const statusText = document.getElementById("status");
+const followBtn = document.getElementById("followBtn");
 
-/* ONLINE / OFFLINE DETECTOR */
+/* FOLLOW BUTTON */
+followBtn.onclick = () => {
+  followBtn.classList.toggle("following");
+  followBtn.textContent = followBtn.classList.contains("following")
+    ? "✓ Following"
+    : "Follow";
+};
+
+/* ONLINE STATUS */
 function updateStatus() {
-  if (navigator.onLine) {
-    statusText.textContent = "🟢 Online";
-  } else {
-    statusText.textContent = "🔴 Offline (cached mode)";
-  }
+  statusText.textContent = navigator.onLine ? "🟢 Online" : "🔴 Offline";
 }
-
 window.addEventListener("online", updateStatus);
 window.addEventListener("offline", updateStatus);
 updateStatus();
@@ -276,7 +225,7 @@ async function loadSongs() {
       el.className = "song";
 
       el.innerHTML = `
-        <div class="cover"></div>
+        <img class="cover" src="${song.cover_url || 'https://via.placeholder.com/70'}">
         <div class="info">
           <div class="title">${song.title}</div>
           <div class="artist">${song.artist}</div>
@@ -301,13 +250,13 @@ async function loadSongs() {
     });
 
   } catch {
-    songsDiv.innerHTML = "⚠️ Offline: Cannot load songs";
+    songsDiv.innerHTML = "⚠️ Offline: Songs unavailable";
   }
 }
 
 loadSongs();
 
-/* SERVICE WORKER REGISTER */
+/* SERVICE WORKER */
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./service-worker.js");
 }

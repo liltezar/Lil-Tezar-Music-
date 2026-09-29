@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lil Tezar Music</title>
-
-  <style>
+  <title>Lil Tezar Music</title>  <style>
     * {
       box-sizing: border-box;
       margin: 0;
@@ -39,7 +36,7 @@
     .container {
       max-width: 600px;
       margin: auto;
-      padding: 20px 15px 100px;
+      padding: 20px 15px 120px;
     }
 
     .welcome {
@@ -66,8 +63,8 @@
     }
 
     .cover {
-      width: 70px;
-      height: 70px;
+      width: 75px;
+      height: 75px;
       border-radius: 10px;
       object-fit: cover;
       background: #222;
@@ -126,11 +123,15 @@
       border-top: 1px solid #292929;
       padding: 12px 15px;
       display: none;
+      z-index: 1000;
     }
 
     .player-title {
       font-size: 13px;
       margin-bottom: 7px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     audio {
@@ -148,35 +149,18 @@
     .error {
       color: #ff7777;
     }
-  </style>
-</head>
-
-<body>
-
-<header>
+  </style></head><body><header>
   <h1>🎵 LIL TEZAR MUSIC</h1>
   <p>Music • Stories • Vibes</p>
-</header>
-
-<div class="container">
-
-  <div class="welcome">
+</header><div class="container">  <div class="welcome">
     <h2>Latest Music</h2>
     <p>Listen to Lil Tezar and more.</p>
-  </div>
-
-  <div id="songs">
+  </div>  <div id="songs">
     <div class="loading">Loading music...</div>
-  </div>
-
-</div>
-
-<div class="player" id="player">
+  </div></div><div class="player" id="player">
   <div class="player-title" id="playerTitle"></div>
-  <audio id="audio" controls></audio>
-</div>
-
-<script>
+  <audio id="audio" controls preload="none"></audio>
+</div><script>
 
 const SUPABASE_URL =
   "https://ujuwvkzzxiwqcfhptaup.supabase.co";
@@ -188,20 +172,6 @@ const songsContainer = document.getElementById("songs");
 const audio = document.getElementById("audio");
 const player = document.getElementById("player");
 const playerTitle = document.getElementById("playerTitle");
-
-
-function storageUrl(bucket, path) {
-
-  if (!path) return "";
-
-  // If Supabase already stored the complete URL,
-  // use it directly.
-  if (path.startsWith("http")) {
-    return path;
-  }
-
-  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
-}
 
 
 async function loadSongs() {
@@ -234,8 +204,17 @@ async function loadSongs() {
 
     songs.forEach(song => {
 
-      const cover = storageUrl("covers", song.cover_path);
-      const audioUrl = storageUrl("music", song.audio_path);
+      /*
+        IMPORTANT:
+        We use the URLs already stored in Supabase.
+      */
+
+      const cover =
+        song.cover_url || "";
+
+      const audioUrl =
+        song.audio_url || "";
+
 
       const card = document.createElement("div");
       card.className = "song";
@@ -245,7 +224,6 @@ async function loadSongs() {
           class="cover"
           src="${cover}"
           alt="${song.title || "Song cover"}"
-          onerror="this.style.display='none'"
         >
 
         <div class="info">
@@ -273,33 +251,74 @@ async function loadSongs() {
         </div>
       `;
 
-      const playButton = card.querySelector(".play");
-      const downloadButton = card.querySelector(".download");
 
-      playButton.onclick = () => {
+      const playButton =
+        card.querySelector(".play");
+
+      const downloadButton =
+        card.querySelector(".download");
+
+
+      playButton.onclick = async () => {
+
+        if (!audioUrl) {
+          alert("This song has no audio URL.");
+          return;
+        }
+
+        audio.pause();
 
         audio.src = audioUrl;
+
         playerTitle.textContent =
           `${song.title || "Untitled"} — ${song.artist || "Unknown artist"}`;
 
         player.style.display = "block";
 
-        audio.play();
+        try {
+
+          await audio.play();
+
+          playButton.textContent = "⏸ Playing";
+
+        } catch (error) {
+
+          console.error("Playback error:", error);
+
+          alert(
+            "The song could not play. Please check the audio file in Supabase."
+          );
+
+        }
 
       };
+
 
       downloadButton.onclick = () => {
 
-        const link = document.createElement("a");
+        if (!audioUrl) {
+          alert("Download unavailable for this song.");
+          return;
+        }
+
+        const link =
+          document.createElement("a");
 
         link.href = audioUrl;
-        link.download = `${song.title || "song"}.mp3`;
+
+        link.download =
+          `${song.title || "song"}.m4a`;
+
+        link.target = "_blank";
 
         document.body.appendChild(link);
+
         link.click();
+
         link.remove();
 
       };
+
 
       songsContainer.appendChild(card);
 
@@ -320,9 +339,29 @@ async function loadSongs() {
 }
 
 
+audio.addEventListener("ended", () => {
+
+  document.querySelectorAll(".play").forEach(button => {
+    button.textContent = "▶ Play";
+  });
+
+});
+
+
+audio.addEventListener("pause", () => {
+
+  document.querySelectorAll(".play").forEach(button => {
+
+    if (button.textContent === "⏸ Playing") {
+      button.textContent = "▶ Play";
+    }
+
+  });
+
+});
+
+
 loadSongs();
 
-</script>
-
-</body>
-  </html>
+</script></body>
+</html>

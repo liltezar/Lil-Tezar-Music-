@@ -61,7 +61,7 @@ body {
   margin-right:10px;
 }
 
-/* GRID PHOTOS */
+/* PHOTO GRID */
 .grid {
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -74,13 +74,10 @@ body {
 }
 
 /* VIDEO */
-.video {
-  margin-bottom:15px;
-}
-
 .video img {
   width:100%;
   border-radius:10px;
+  margin-bottom:10px;
 }
 
 /* PLAYER */
@@ -99,7 +96,7 @@ button {
   border:none;
   padding:5px 8px;
   border-radius:8px;
-  margin:3px;
+  margin-top:5px;
 }
 </style>
 </head>
@@ -109,9 +106,22 @@ button {
 <!-- HOME -->
 <div id="home" class="page active">
 
-<div style="display:flex;align-items:center;gap:10px;">
-<img src="profile.jpg" style="width:45px;height:45px;border-radius:50%;border:2px solid red;">
-<b>Lil Tezar</b>
+<!-- PROFILE + SUBSCRIBE -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;">
+
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="profile.jpg" style="width:45px;height:45px;border-radius:50%;border:2px solid red;">
+    <div>
+      <b>Lil Tezar</b><br>
+      <small style="color:#aaa;">Artist</small>
+    </div>
+  </div>
+
+  <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank"
+  style="background:red;color:white;padding:6px 12px;border-radius:20px;text-decoration:none;">
+  ▶ Subscribe
+  </a>
+
 </div>
 
 <h2>Home</h2>
@@ -173,7 +183,7 @@ document.querySelectorAll(".nav a").forEach(a=>a.classList.remove("active"));
 e.target.classList.add("active");
 }
 
-/* SONGS */
+/* LOAD SONGS */
 async function loadSongs(){
 const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`,{
 headers:{
@@ -186,6 +196,7 @@ songs = await res.json();
 songs.reverse();
 
 songs.forEach((song,i)=>{
+
 let plays = localStorage.getItem("plays_"+i)||0;
 let likes = localStorage.getItem("likes_"+i)||0;
 
@@ -197,10 +208,10 @@ const html=`
 <small>${song.artist}</small><br>
 
 <button onclick="playSong(${i})">▶</button>
-<button onclick="likeSong(${i})">❤️ ${likes}</button>
+<button onclick="likeSong(${i}, this)">❤️ ${likes}</button>
 <button onclick="window.open('${song.audio_url}')">⬇</button>
 <br>
-<small>Plays: ${plays}</small>
+<small>Plays: <span id="plays_${i}">${plays}</span></small>
 </div>
 </div>
 `;
@@ -221,26 +232,28 @@ frameborder="0"></iframe>`;
 
 /* PLAY */
 function playSong(i){
-audio.src=songs[i].audio_url;
-player.style.display="block";
+audio.src = songs[i].audio_url;
+player.style.display = "block";
 audio.play();
 
 let plays = localStorage.getItem("plays_"+i)||0;
 plays++;
 localStorage.setItem("plays_"+i,plays);
-location.reload();
+
+document.getElementById("plays_"+i).innerText = plays;
 }
 
 /* LIKE */
-function likeSong(i){
+function likeSong(i,btn){
 let likes = localStorage.getItem("likes_"+i)||0;
 likes++;
 localStorage.setItem("likes_"+i,likes);
-location.reload();
+
+btn.innerText = "❤️ " + likes;
 }
 
-/* VIDEOS LIST */
-const videos=[
+/* VIDEOS */
+const videos = [
 "NGamrf4B8FI",
 "ex1RZgZoWuk"
 ];
@@ -258,8 +271,8 @@ document.getElementById("videoPlayer").innerHTML=`
 src="https://www.youtube.com/embed/${id}?autoplay=1"></iframe>`;
 }
 
-/* PHOTOS GRID */
-const photos=[
+/* PHOTOS */
+const photos = [
 "profile.jpg",
 "profile.jpg",
 "profile.jpg",
@@ -267,8 +280,7 @@ const photos=[
 ];
 
 photos.forEach(src=>{
-document.getElementById("photoGrid").innerHTML+=`
-<img src="${src}">`;
+document.getElementById("photoGrid").innerHTML+=`<img src="${src}">`;
 });
 
 loadSongs();

@@ -7,84 +7,109 @@
 <title>Lil Tezar App</title>
 
 <style>
-body {
-  margin:0;
-  font-family:Arial;
-  background:#0b0b0b;
-  color:white;
+body{
+margin:0;
+font-family:Arial;
+background:#0b0b0b;
+color:white;
 }
 
-.nav {
-  position:fixed;
-  bottom:0;
-  width:100%;
-  display:flex;
-  justify-content:space-around;
-  background:#111;
-  padding:10px 0;
+/* HEADER */
+.header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:10px;
+background:#111;
+border-radius:15px;
+margin:10px;
 }
 
-.nav a { color:#aaa; text-decoration:none; }
-.nav a.active { color:red; }
-
-.page { display:none; padding:15px; padding-bottom:80px; }
-.page.active { display:block; }
-
-.song {
-  display:flex;
-  background:#1a1a1a;
-  padding:10px;
-  border-radius:15px;
-  margin-bottom:10px;
+/* PROFILE */
+.profile{
+display:flex;
+align-items:center;
+gap:10px;
 }
 
-.song img {
-  width:60px;
-  height:60px;
-  border-radius:10px;
-  margin-right:10px;
+.profile img{
+width:45px;
+height:45px;
+border-radius:50%;
+border:2px solid red;
 }
 
-.grid {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
+/* BUTTON */
+.btn{
+background:#24292e;
+color:white;
+padding:7px 14px;
+border-radius:20px;
+text-decoration:none;
+font-size:13px;
+font-weight:bold;
 }
 
-.grid img { width:100%; border-radius:10px; }
-
-.video img {
-  width:100%;
-  border-radius:10px;
-  margin-bottom:10px;
+/* NAV */
+.nav{
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
+justify-content:space-around;
+background:#111;
+padding:10px 0;
 }
 
-.player {
-  position:fixed;
-  bottom:60px;
-  width:100%;
-  background:#111;
-  padding:10px;
-  display:none;
+.nav a{
+color:#aaa;
+text-decoration:none;
 }
 
-button {
-  background:#333;
-  color:white;
-  border:none;
-  padding:5px 8px;
-  border-radius:8px;
+.nav a.active{
+color:red;
 }
-</style>
-</head>
 
-<body>
+/* PAGE */
+.page{
+display:none;
+padding:15px;
+padding-bottom:80px;
+}
 
-<!-- HOME -->
-<div id="home" class="page active">
+.page.active{
+display:block;
+}
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-  <div style="display:flex;gap:10px;align-items:center;">
-    <img src="profile.jpg" style="width:45px;height:45px;border-radius:50%;border:2px solid red;">
-    <div>
-      <b>Lil Tezar</b><br>
+/* SONG */
+.song{
+display:flex;
+background:#1a1a1a;
+padding:10px;
+border-radius:15px;
+margin-bottom:10px;
+}
+
+.song img{
+width:60px;
+height:60px;
+border-radius:10px;
+margin-right:10px;
+}
+
+/* GRID */
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+.grid img{
+width:100%;
+border-radius:10px;
+}
+
+/* PLAYER */
+.player{
+position:fixed;
+bottom:60

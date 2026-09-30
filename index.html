@@ -1,21 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Lil Tezar App</title>
-
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:#0b0b0b;
-color:white;
-}
-
-/* NAV */
-.nav{
+<!DOCTYPE html>  <html>    <head>    
+<meta charset="UTF-8">    
+<meta name="viewport" content="width=device-width, initial-scale=1">  <title>Lil Tezar App</title>  <style>    
+body {    
+  margin:0;    
+  font-family:Arial;    
+  background:#0b0b0b;    
+  color:white;    
+}    /* NAV */
+.nav {
 position:fixed;
 bottom:0;
 width:100%;
@@ -25,28 +17,28 @@ background:#111;
 padding:10px 0;
 }
 
-.nav a{
+.nav a {
 color:#aaa;
 text-decoration:none;
 }
 
-.nav a.active{
+.nav a.active {
 color:red;
 }
 
 /* PAGE */
-.page{
+.page {
 display:none;
 padding:15px;
-padding-bottom:100px;
+padding-bottom:80px;
 }
 
-.page.active{
+.page.active {
 display:block;
 }
 
 /* SONG */
-.song{
+.song {
 display:flex;
 background:#1a1a1a;
 padding:10px;
@@ -54,15 +46,34 @@ border-radius:15px;
 margin-bottom:10px;
 }
 
-.song img{
+.song img {
 width:60px;
 height:60px;
 border-radius:10px;
 margin-right:10px;
 }
 
+/* PHOTO GRID */
+.grid {
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+.grid img {
+width:100%;
+border-radius:10px;
+}
+
+/* VIDEO */
+.video img {
+width:100%;
+border-radius:10px;
+margin-bottom:10px;
+}
+
 /* PLAYER */
-.player{
+.player {
 position:fixed;
 bottom:60px;
 width:100%;
@@ -71,113 +82,48 @@ padding:10px;
 display:none;
 }
 
-/* NOW PLAYING */
-.now{
-font-size:13px;
-margin-bottom:5px;
-color:#aaa;
+button {
+background:#333;
+color:white;
+border:none;
+padding:5px 8px;
+border-radius:8px;
+margin-top:5px;
 }
-
-/* CONTROLS */
-.controls button{
-margin-right:5px;
-}
-
-/* GRID */
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-}
-
-.grid img{
-width:100%;
-border-radius:10px;
-cursor:pointer;
-}
-</style>
-</head>
-
-<body>
-
-<!-- HOME -->
-<div id="home" class="page active">
-
-<div style="display:flex;justify-content:space-between;align-items:center;">
-<div style="display:flex;gap:10px;align-items:center;">
-<img src="images/profile.jpg" style="width:45px;height:45px;border-radius:50%;border:2px solid red;">
+</style>  </head>  <body>  <!-- HOME -->  <div id="home" class="page active">  <!-- PROFILE + SUBSCRIBE -->  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;">    <div style="display:flex;align-items:center;gap:10px;">
+<img src="profile.jpg" style="width:45px;height:45px;border-radius:50%;border:2px solid red;">
 <div>
 <b>Lil Tezar</b><br>
 <small style="color:#aaa;">Artist</small>
 </div>
-</div>
 
-<a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank"
-style="background:red;color:white;padding:6px 12px;border-radius:20px;text-decoration:none;">
-▶ Subscribe
-</a>
-</div>
-
-<h3>Recently Added</h3>
-<div id="homeSongs"></div>
-
-</div>
-
-<!-- MUSIC -->
-<div id="music" class="page">
-<h2>Music</h2>
-<div id="musicList"></div>
-</div>
-
-<!-- VIDEOS -->
-<div id="videos" class="page">
-<h2>Videos</h2>
-<div id="videoList"></div>
-<div id="videoPlayer"></div>
-</div>
-
-<!-- PHOTOS -->
-<div id="photos" class="page">
-<h2>Photos</h2>
-<div class="grid" id="photoGrid"></div>
-</div>
-
-<!-- PLAYER -->
-<div class="player" id="player">
-
-<div class="now" id="nowPlaying">Nothing playing</div>
-
-<audio id="audio" controls></audio>
-
-<div class="controls">
-<button onclick="prevSong()">⏮</button>
-<button onclick="toggleShuffle()">🔀</button>
-<button onclick="toggleRepeat()">🔁</button>
-<button onclick="nextSong()">⏭</button>
-</div>
-
-</div>
-
-<!-- NAV -->
-<div class="nav">
-<a onclick="showPage(event,'home')" class="active">Home</a>
-<a onclick="showPage(event,'music')">Music</a>
-<a onclick="showPage(event,'videos')">Videos</a>
-<a onclick="showPage(event,'photos')">Photos</a>
-</div>
-
-<script>
-const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
-const SUPABASE_KEY = "sb_publishable_7zCr4dg-xaj7I7syGO685g_Fk_fIbFS";
-
-let songs = [];
-let currentIndex = 0;
-let shuffle = false;
-let repeat = false;
-
+  </div>  <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank"    
+style="background:red;color:white;padding:6px 12px;border-radius:20px;text-decoration:none;">  
+▶ Subscribe  
+</a>  </div>  <h2>Home</h2>  <h3>Recently Added</h3>    
+<div id="homeSongs"></div>  <h3>Latest Video</h3>    
+<div id="homeVideo"></div>  </div>  <!-- MUSIC -->  <div id="music" class="page">    
+<h2>Music</h2>    
+<div id="musicList"></div>    
+</div>  <!-- VIDEOS -->  <div id="videos" class="page">    
+<h2>Videos</h2>    
+<div id="videoList"></div>    
+<div id="videoPlayer"></div>    
+</div>  <!-- PHOTOS -->  <div id="photos" class="page">    
+<h2>Photos</h2>    
+<div class="grid" id="photoGrid"></div>    
+</div>  <!-- PLAYER -->  <div class="player" id="player">    
+<audio id="audio" controls></audio>    
+</div>  <!-- NAV -->  <div class="nav">    
+<a onclick="showPage(event,'home')" class="active">Home</a>    
+<a onclick="showPage(event,'music')">Music</a>    
+<a onclick="showPage(event,'videos')">Videos</a>    
+<a onclick="showPage(event,'photos')">Photos</a>    
+</div>  <script>    
+const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";    
+const SUPABASE_KEY = "sb_publishable_7zCr4dg-xaj7I7syGO685g_Fk_fIbFS";    let songs = [];
 const audio = document.getElementById("audio");
 const player = document.getElementById("player");
-const nowPlaying = document.getElementById("nowPlaying");
 
 /* NAV */
 function showPage(e,id){
@@ -190,10 +136,10 @@ e.target.classList.add("active");
 
 /* LOAD SONGS */
 async function loadSongs(){
-const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`,{
+const res = await fetch(${SUPABASE_URL}/rest/v1/songs?select=*,{
 headers:{
 apikey:SUPABASE_KEY,
-Authorization:`Bearer ${SUPABASE_KEY}`
+Authorization:Bearer ${SUPABASE_KEY}
 }
 });
 
@@ -202,124 +148,92 @@ songs.reverse();
 
 songs.forEach((song,i)=>{
 
+let plays = localStorage.getItem("plays_"+i)||0;
 let likes = localStorage.getItem("likes_"+i)||0;
-let liked = localStorage.getItem("liked_"+i);
 
-const html = `
-<div class="song">
-<img src="${song.cover_url}">
-<div>
-<b>${song.title}</b><br>
-<small>${song.artist}</small><br>
+const html=`
 
-<button onclick="playSong(${i})">▶</button>
+<div class="song">    
+<img src="${song.cover_url}">    
+<div>    
+<b>${song.title}</b><br>    
+<small>${song.artist}</small><br>    <button onclick="playSong(${i})">▶</button>
+<button onclick="likeSong(${i}, this)">♥️ ${likes}</button>
+<button onclick="window.open('${song.audio_url}')">⬇</button>
+<br>
+<small>Plays: <span id="plays_${i}">${plays}</span></small>
 
-<button onclick="likeSong(${i}, this)">
-${liked ? "❤️ "+likes : "🤍 "+likes}
-</button>
-</div>
-</div>
-`;
-
-document.getElementById("musicList").innerHTML += html;
+</div>    
+</div>    
+`;    document.getElementById("musicList").innerHTML+=html;
 
 if(i<2){
-document.getElementById("homeSongs").innerHTML += html;
+document.getElementById("homeSongs").innerHTML+=html;
 }
 });
-}
 
-/* PLAY */
+/* HOME VIDEO */
+document.getElementById("homeVideo").innerHTML=`
+
+<iframe width="100%" height="200"    
+src="https://www.youtube.com/embed/NGamrf4B8FI"    
+frameborder="0"></iframe>`;    
+}    /* PLAY */
 function playSong(i){
-currentIndex = i;
-
 audio.src = songs[i].audio_url;
 player.style.display = "block";
 audio.play();
 
-nowPlaying.innerText = songs[i].title + " - " + songs[i].artist;
-}
+let plays = localStorage.getItem("plays_"+i)||0;
+plays++;
+localStorage.setItem("plays_"+i,plays);
 
-/* NEXT */
-function nextSong(){
-if(shuffle){
-currentIndex = Math.floor(Math.random()*songs.length);
-}else{
-currentIndex++;
-if(currentIndex >= songs.length) currentIndex = 0;
+document.getElementById("plays_"+i).innerText = plays;
 }
-playSong(currentIndex);
-}
-
-/* PREV */
-function prevSong(){
-currentIndex--;
-if(currentIndex < 0) currentIndex = songs.length-1;
-playSong(currentIndex);
-}
-
-/* AUTO NEXT */
-audio.addEventListener("ended", ()=>{
-if(repeat){
-playSong(currentIndex);
-}else{
-nextSong();
-}
-});
 
 /* LIKE */
 function likeSong(i,btn){
-if(localStorage.getItem("liked_"+i)) return;
-
 let likes = localStorage.getItem("likes_"+i)||0;
 likes++;
-
 localStorage.setItem("likes_"+i,likes);
-localStorage.setItem("liked_"+i,true);
 
-btn.innerText = "❤️ "+likes;
-}
-
-/* SHUFFLE */
-function toggleShuffle(){
-shuffle = !shuffle;
-alert("Shuffle: " + (shuffle ? "ON" : "OFF"));
-}
-
-/* REPEAT */
-function toggleRepeat(){
-repeat = !repeat;
-alert("Repeat: " + (repeat ? "ON" : "OFF"));
+btn.innerText = "❤️ " + likes;
 }
 
 /* VIDEOS */
-["NGamrf4B8FI","ex1RZgZoWuk"].forEach(id=>{
-document.getElementById("videoList").innerHTML += `
-<div onclick="playVideo('${id}')">
-<img src="https://img.youtube.com/vi/${id}/0.jpg">
-</div>`;
+const videos = [
+"NGamrf4B8FI",
+"ex1RZgZoWuk"
+];
+
+videos.forEach(id=>{
+document.getElementById("videoList").innerHTML+=`
+
+<div class="video" onclick="playVideo('${id}')">    
+<img src="https://img.youtube.com/vi/${id}/0.jpg">    
+</div>`;    
+});    function playVideo(id){
+document.getElementById("videoPlayer").innerHTML=`
+
+<iframe width="100%" height="220"    
+src="https://www.youtube.com/embed/${id}?autoplay=1"></iframe>`;    
+}    /* PHOTOS */
+const photos = [
+"images/cover1.jpg",
+"images/cover2.jpg",
+"images/cover3.jpg"
+];
+
+photos.forEach(src=>{
+document.getElementById("photoGrid").innerHTML+=<img src="${src}">;
 });
 
-function playVideo(id){
-document.getElementById("videoPlayer").innerHTML = `
-<iframe width="100%" height="220"
-src="https://www.youtube.com/embed/${id}?autoplay=1"></iframe>`;
-}
-
-/* PHOTOS */
-["images/cover1.png","images/cover2.png","images/cover3.png"]
-.forEach(src=>{
-document.getElementById("photoGrid").innerHTML += `<img src="${src}">`;
-});
-
-/* INIT */
 loadSongs();
 
-/* SW */
+/* SERVICE WORKER */
 if("serviceWorker" in navigator){
 navigator.serviceWorker.register("service-worker.js");
 }
-</script>
+</script>  </body>
 
-</body>
-</html>
+</html> 

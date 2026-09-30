@@ -33,12 +33,24 @@
       height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid #ff1a1a;
+      border: 3px solid red;
+      margin-bottom: 10px;
     }
 
-    .name { font-size: 22px; font-weight: bold; }
-    .role { color: #aaa; }
-    .bio { font-size: 14px; color: #ccc; margin-top: 8px; }
+    .name {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .role {
+      color: #aaa;
+      margin: 5px 0;
+    }
+
+    .bio {
+      font-size: 14px;
+      color: #ccc;
+    }
 
     .subscribe-btn {
       display: inline-block;
@@ -51,7 +63,9 @@
       font-weight: bold;
     }
 
-    .section { margin: 20px; }
+    .section {
+      margin: 20px;
+    }
 
     .song {
       display: flex;
@@ -69,28 +83,32 @@
       margin-right: 10px;
     }
 
-    .title { font-weight: bold; }
-    .artist { font-size: 13px; color: #aaa; }
-
     .buttons button {
       margin-right: 5px;
+      margin-top: 5px;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
       background: #333;
       color: white;
-      border: none;
-      padding: 5px 8px;
-      border-radius: 8px;
       cursor: pointer;
     }
 
-    /* Player */
+    .buttons button:hover {
+      background: red;
+    }
+
     #player {
       position: fixed;
       bottom: 0;
-      left: 0;
-      right: 0;
+      width: 100%;
       background: #111;
       padding: 10px;
       display: none;
+    }
+
+    audio {
+      width: 100%;
     }
   </style>
 </head>
@@ -104,12 +122,14 @@
 
   <!-- PROFILE -->
   <div class="profile">
-    <img src="your-profile.jpg" alt="Lil Tezar">
+    <img src="profile.jpg" alt="Lil Tezar">
 
-    <div class="name">LIL TEZAR </div>
+    <div class="name">LIL TEZAR ✔</div>
     <div class="role">Artist • Songwriter</div>
 
-    <div class="bio">Real pain. Real stories. No fake love.</div>
+    <div class="bio">
+      Real pain. Real stories. No fake love.
+    </div>
 
     <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank" class="subscribe-btn">
       ▶ Subscribe
@@ -122,7 +142,7 @@
     <div id="songs">Loading...</div>
   </div>
 
-  <!-- AUDIO PLAYER -->
+  <!-- PLAYER -->
   <div id="player">
     <audio id="audio" controls></audio>
   </div>
@@ -135,7 +155,6 @@ const songsDiv = document.getElementById("songs");
 const audio = document.getElementById("audio");
 const player = document.getElementById("player");
 
-/* LOAD SONGS */
 async function loadSongs() {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`, {
@@ -164,13 +183,14 @@ async function loadSongs() {
           <div class="artist">${song.artist}</div>
 
           <div class="buttons">
-            <button>▶ Play</button>
-            <button>⬇ Download</button>
+            <button class="play">▶ Play</button>
+            <button class="download">⬇ Download</button>
           </div>
         </div>
       `;
 
-      const [playBtn, downloadBtn] = el.querySelectorAll("button");
+      const playBtn = el.querySelector(".play");
+      const downloadBtn = el.querySelector(".download");
 
       playBtn.onclick = () => {
         audio.src = song.audio_url;
@@ -186,12 +206,17 @@ async function loadSongs() {
     });
 
   } catch (err) {
-    songsDiv.innerHTML = "⚠️ Offline or Supabase error";
+    songsDiv.innerHTML = "⚠️ Error loading songs";
     console.log(err);
   }
 }
 
 loadSongs();
+
+// SERVICE WORKER REGISTER
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
 </script>
 
 </body>

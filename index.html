@@ -23,20 +23,18 @@ body {
   justify-content:space-around;
   background:#111;
   padding:10px 0;
-  border-top:1px solid #222;
 }
 
 .nav a {
   color:#aaa;
   text-decoration:none;
-  font-size:14px;
 }
 
 .nav a.active {
   color:red;
 }
 
-/* PAGES */
+/* PAGE */
 .page {
   display:none;
   padding:15px;
@@ -63,14 +61,26 @@ body {
   margin-right:10px;
 }
 
-/* BUTTON */
-button {
-  margin-top:5px;
-  background:#333;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:8px;
+/* GRID PHOTOS */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.grid img {
+  width:100%;
+  border-radius:10px;
+}
+
+/* VIDEO */
+.video {
+  margin-bottom:15px;
+}
+
+.video img {
+  width:100%;
+  border-radius:10px;
 }
 
 /* PLAYER */
@@ -83,8 +93,13 @@ button {
   display:none;
 }
 
-audio {
-  width:100%;
+button {
+  background:#333;
+  color:white;
+  border:none;
+  padding:5px 8px;
+  border-radius:8px;
+  margin:3px;
 }
 </style>
 </head>
@@ -93,52 +108,52 @@ audio {
 
 <!-- HOME -->
 <div id="home" class="page active">
-  <h2>Home</h2>
 
-  <h3>Recently Added</h3>
-  <div id="homeSongs"></div>
+<div style="display:flex;align-items:center;gap:10px;">
+<img src="profile.jpg" style="width:45px;height:45px;border-radius:50%;border:2px solid red;">
+<b>Lil Tezar</b>
+</div>
 
-  <h3>Latest Video</h3>
-  <div id="homeVideo"></div>
+<h2>Home</h2>
 
-  <h3>Photos</h3>
-  <img src="profile.jpg" style="width:100%;border-radius:15px;">
+<h3>Recently Added</h3>
+<div id="homeSongs"></div>
+
+<h3>Latest Video</h3>
+<div id="homeVideo"></div>
+
 </div>
 
 <!-- MUSIC -->
 <div id="music" class="page">
-  <h2>Music</h2>
-  <div id="musicList"></div>
+<h2>Music</h2>
+<div id="musicList"></div>
 </div>
 
 <!-- VIDEOS -->
 <div id="videos" class="page">
-  <h2>Videos</h2>
-
-  <div onclick="playVideo('NGamrf4B8FI')">
-    <img src="https://img.youtube.com/vi/NGamrf4B8FI/0.jpg" style="width:100%;border-radius:15px;">
-  </div>
-
-  <div id="videoPlayer"></div>
+<h2>Videos</h2>
+<div id="videoList"></div>
+<div id="videoPlayer"></div>
 </div>
 
 <!-- PHOTOS -->
 <div id="photos" class="page">
-  <h2>Photos</h2>
-  <img src="profile.jpg" style="width:100%;border-radius:15px;">
+<h2>Photos</h2>
+<div class="grid" id="photoGrid"></div>
 </div>
 
 <!-- PLAYER -->
 <div class="player" id="player">
-  <audio id="audio" controls></audio>
+<audio id="audio" controls></audio>
 </div>
 
 <!-- NAV -->
 <div class="nav">
-  <a onclick="showPage(event,'home')" class="active">Home</a>
-  <a onclick="showPage(event,'music')">Music</a>
-  <a onclick="showPage(event,'videos')">Videos</a>
-  <a onclick="showPage(event,'photos')">Photos</a>
+<a onclick="showPage(event,'home')" class="active">Home</a>
+<a onclick="showPage(event,'music')">Music</a>
+<a onclick="showPage(event,'videos')">Videos</a>
+<a onclick="showPage(event,'photos')">Photos</a>
 </div>
 
 <script>
@@ -149,89 +164,118 @@ let songs = [];
 const audio = document.getElementById("audio");
 const player = document.getElementById("player");
 
-/* NAV SWITCH */
-function showPage(e,id) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+/* NAV */
+function showPage(e,id){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 
-  document.querySelectorAll(".nav a").forEach(a => a.classList.remove("active"));
-  e.target.classList.add("active");
+document.querySelectorAll(".nav a").forEach(a=>a.classList.remove("active"));
+e.target.classList.add("active");
 }
 
-/* LOAD SONGS */
-async function loadSongs() {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
-      }
-    });
+/* SONGS */
+async function loadSongs(){
+const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`,{
+headers:{
+apikey:SUPABASE_KEY,
+Authorization:`Bearer ${SUPABASE_KEY}`
+}
+});
 
-    songs = await res.json();
+songs = await res.json();
+songs.reverse();
 
-    document.getElementById("musicList").innerHTML = "";
-    document.getElementById("homeSongs").innerHTML = "";
+songs.forEach((song,i)=>{
+let plays = localStorage.getItem("plays_"+i)||0;
+let likes = localStorage.getItem("likes_"+i)||0;
 
-    if (!songs.length) {
-      document.getElementById("musicList").innerHTML = "No songs found.";
-      return;
-    }
+const html=`
+<div class="song">
+<img src="${song.cover_url}">
+<div>
+<b>${song.title}</b><br>
+<small>${song.artist}</small><br>
 
-    // show newest first
-    songs.reverse();
+<button onclick="playSong(${i})">▶</button>
+<button onclick="likeSong(${i})">❤️ ${likes}</button>
+<button onclick="window.open('${song.audio_url}')">⬇</button>
+<br>
+<small>Plays: ${plays}</small>
+</div>
+</div>
+`;
 
-    songs.forEach((song, i) => {
-      const html = `
-        <div class="song">
-          <img src="${song.cover_url}">
-          <div>
-            <b>${song.title}</b><br>
-            <small>${song.artist}</small><br>
-            <button onclick="playSong(${i})">▶ Play</button>
-            <button onclick="window.open('${song.audio_url}')">⬇</button>
-          </div>
-        </div>
-      `;
+document.getElementById("musicList").innerHTML+=html;
 
-      document.getElementById("musicList").innerHTML += html;
+if(i<2){
+document.getElementById("homeSongs").innerHTML+=html;
+}
+});
 
-      if (i < 2) {
-        document.getElementById("homeSongs").innerHTML += html;
-      }
-    });
-
-    document.getElementById("homeVideo").innerHTML = `
-      <iframe width="100%" height="200"
-      src="https://www.youtube.com/embed/NGamrf4B8FI"
-      frameborder="0" allowfullscreen></iframe>`;
-
-  } catch (err) {
-    document.getElementById("musicList").innerHTML = "⚠️ Error loading songs";
-    console.log(err);
-  }
+/* HOME VIDEO */
+document.getElementById("homeVideo").innerHTML=`
+<iframe width="100%" height="200"
+src="https://www.youtube.com/embed/NGamrf4B8FI"
+frameborder="0"></iframe>`;
 }
 
-/* PLAYER */
-function playSong(i) {
-  audio.src = songs[i].audio_url;
-  player.style.display = "block";
-  audio.play();
+/* PLAY */
+function playSong(i){
+audio.src=songs[i].audio_url;
+player.style.display="block";
+audio.play();
+
+let plays = localStorage.getItem("plays_"+i)||0;
+plays++;
+localStorage.setItem("plays_"+i,plays);
+location.reload();
 }
 
-/* VIDEO */
-function playVideo(id) {
-  document.getElementById("videoPlayer").innerHTML =
-    `<iframe width="100%" height="200"
-    src="https://www.youtube.com/embed/${id}?autoplay=1"
-    frameborder="0"></iframe>`;
+/* LIKE */
+function likeSong(i){
+let likes = localStorage.getItem("likes_"+i)||0;
+likes++;
+localStorage.setItem("likes_"+i,likes);
+location.reload();
 }
+
+/* VIDEOS LIST */
+const videos=[
+"NGamrf4B8FI",
+"ex1RZgZoWuk"
+];
+
+videos.forEach(id=>{
+document.getElementById("videoList").innerHTML+=`
+<div class="video" onclick="playVideo('${id}')">
+<img src="https://img.youtube.com/vi/${id}/0.jpg">
+</div>`;
+});
+
+function playVideo(id){
+document.getElementById("videoPlayer").innerHTML=`
+<iframe width="100%" height="220"
+src="https://www.youtube.com/embed/${id}?autoplay=1"></iframe>`;
+}
+
+/* PHOTOS GRID */
+const photos=[
+"profile.jpg",
+"profile.jpg",
+"profile.jpg",
+"profile.jpg"
+];
+
+photos.forEach(src=>{
+document.getElementById("photoGrid").innerHTML+=`
+<img src="${src}">`;
+});
 
 loadSongs();
 
 /* SERVICE WORKER */
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 

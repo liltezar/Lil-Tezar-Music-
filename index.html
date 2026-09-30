@@ -12,16 +12,17 @@ body {
   font-family: Arial;
   background: #0b0b0b;
   color: white;
+  scroll-behavior: smooth;
 }
 
-/* NAV BAR */
+/* NAV */
 .nav {
   position: sticky;
   top: 0;
   background: #0b0b0b;
   display: flex;
   justify-content: space-around;
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid #222;
   z-index: 1000;
 }
@@ -32,7 +33,7 @@ body {
   font-weight: bold;
 }
 
-.nav a:hover {
+.nav a.active {
   color: red;
 }
 
@@ -42,43 +43,25 @@ body {
   padding: 20px;
 }
 
-/* TOP LINKS */
 .top-links a {
   color: #aaa;
   text-decoration: none;
-  font-size: 14px;
 }
 
 .top-links span {
   margin: 0 5px;
-  color: #555;
 }
 
 /* PROFILE */
 .profile {
-  background: #1a1a1a;
-  margin: 15px;
-  border-radius: 20px;
-  padding: 20px;
   text-align: center;
 }
 
 .profile img {
-  width: 120px;
-  height: 120px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   border: 3px solid red;
-}
-
-/* BUTTON */
-.subscribe-btn {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 10px 20px;
-  background: red;
-  color: white;
-  border-radius: 20px;
-  text-decoration: none;
 }
 
 /* SECTION */
@@ -86,13 +69,18 @@ body {
   margin: 20px;
 }
 
-/* SONG */
+/* SONG CARD */
 .song {
   display: flex;
-  background: #1f1f1f;
+  background: #1a1a1a;
   padding: 10px;
   border-radius: 15px;
   margin-bottom: 10px;
+  transition: 0.2s;
+}
+
+.song:hover {
+  background: #222;
 }
 
 .song img {
@@ -107,10 +95,36 @@ body {
   margin-top: 5px;
   margin-right: 5px;
   background: #333;
-  color: white;
   border: none;
   padding: 6px 10px;
   border-radius: 8px;
+  color: white;
+}
+
+.buttons button:hover {
+  background: red;
+}
+
+/* VIDEO CARD */
+.video-card {
+  position: relative;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+
+.video-card img {
+  width: 100%;
+  border-radius: 15px;
+}
+
+.video-card span {
+  position: absolute;
+  top: 40%;
+  left: 45%;
+  font-size: 30px;
+  background: rgba(0,0,0,0.6);
+  padding: 10px;
+  border-radius: 50%;
 }
 
 /* PLAYER */
@@ -126,13 +140,6 @@ body {
 audio {
   width: 100%;
 }
-
-/* VIDEO */
-.video {
-  margin-bottom: 15px;
-  border-radius: 15px;
-  overflow: hidden;
-}
 </style>
 </head>
 
@@ -140,7 +147,7 @@ audio {
 
 <!-- NAV -->
 <div class="nav">
-  <a href="#music">Music</a>
+  <a href="#music" class="active">Music</a>
   <a href="#videos">Videos</a>
   <a href="#photos">Photos</a>
 </div>
@@ -148,12 +155,9 @@ audio {
 <!-- HEADER -->
 <div class="header">
   <h1>🎵 LIL TEZAR</h1>
-
   <div class="top-links">
-    <a href="#music">Music</a>
-    <span>•</span>
-    <a href="#stories">Stories</a>
-    <span>•</span>
+    <a href="#music">Music</a> •
+    <a href="#stories">Stories</a> •
     <a href="#vibes">Vibes</a>
   </div>
 </div>
@@ -162,31 +166,24 @@ audio {
 <div class="profile">
   <img src="profile.jpg">
   <h2>LIL TEZAR ✔</h2>
-  <p>Artist • Songwriter</p>
-  <p>Real pain. Real stories. No fake love.</p>
-
-  <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank" class="subscribe-btn">
-    ▶ Subscribe
-  </a>
 </div>
 
 <!-- MUSIC -->
 <div class="section" id="music">
   <h2>Latest Music</h2>
-  <div id="songs">Loading...</div>
+  <div id="songs"></div>
 </div>
 
 <!-- VIDEOS -->
 <div class="section" id="videos">
   <h2>Videos</h2>
 
-  <div class="video">
-    <iframe width="100%" height="200"
-      src="https://www.youtube.com/embed/NGamrf4B8FI"
-      frameborder="0" allowfullscreen>
-    </iframe>
+  <div class="video-card" onclick="playVideo('NGamrf4B8FI')">
+    <img src="https://img.youtube.com/vi/NGamrf4B8FI/0.jpg">
+    <span>▶</span>
   </div>
 
+  <div id="videoPlayer"></div>
 </div>
 
 <!-- PHOTOS -->
@@ -204,7 +201,7 @@ audio {
 <!-- VIBES -->
 <div class="section" id="vibes">
   <h2>Vibes</h2>
-  <p>Behind the scenes & vibes content.</p>
+  <p>Behind the scenes content.</p>
 </div>
 
 <!-- PLAYER -->
@@ -214,57 +211,85 @@ audio {
 
 <script>
 const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
-const SUPABASE_KEY = "sb_publishable_7zCr4dg-xaj7I7syGO685g_Fk_fIbFS";
+const SUPABASE_KEY = "YOUR_KEY";
 
 const songsDiv = document.getElementById("songs");
 const audio = document.getElementById("audio");
 const player = document.getElementById("player");
 
+let currentIndex = 0;
+let songsList = [];
+
 async function loadSongs() {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
-      }
-    });
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`
+    }
+  });
 
-    const songs = await res.json();
-    songsDiv.innerHTML = "";
+  songsList = await res.json();
 
-    songs.forEach(song => {
-      const el = document.createElement("div");
-      el.className = "song";
+  songsList.forEach((song, index) => {
+    const el = document.createElement("div");
+    el.className = "song";
 
-      el.innerHTML = `
-        <img src="${song.cover_url}">
-        <div>
-          <b>${song.title}</b><br>
-          <small>${song.artist}</small><br>
-          <div class="buttons">
-            <button class="play">▶ Play</button>
-            <button class="download">⬇ Download</button>
-          </div>
+    el.innerHTML = `
+      <img src="${song.cover_url}">
+      <div>
+        <b>${song.title}</b><br>
+        <small>${song.artist}</small>
+        <div class="buttons">
+          <button onclick="playSong(${index})">▶</button>
+          <button onclick="window.open('${song.audio_url}')">⬇</button>
         </div>
-      `;
+      </div>
+    `;
 
-      el.querySelector(".play").onclick = () => {
-        audio.src = song.audio_url;
-        player.style.display = "block";
-        audio.play();
-      };
-
-      el.querySelector(".download").onclick = () => {
-        window.open(song.audio_url, "_blank");
-      };
-
-      songsDiv.appendChild(el);
-    });
-
-  } catch {
-    songsDiv.innerHTML = "⚠️ Error loading songs";
-  }
+    songsDiv.appendChild(el);
+  });
 }
+
+function playSong(index) {
+  currentIndex = index;
+  audio.src = songsList[index].audio_url;
+  player.style.display = "block";
+  audio.play();
+}
+
+/* AUTO NEXT SONG */
+audio.addEventListener("ended", () => {
+  currentIndex++;
+  if (currentIndex < songsList.length) {
+    playSong(currentIndex);
+  }
+});
+
+/* VIDEO */
+function playVideo(id) {
+  document.getElementById("videoPlayer").innerHTML =
+    `<iframe width="100%" height="220"
+    src="https://www.youtube.com/embed/${id}?autoplay=1"
+    frameborder="0" allowfullscreen></iframe>`;
+}
+
+/* ACTIVE NAV */
+const links = document.querySelectorAll(".nav a");
+window.addEventListener("scroll", () => {
+  let fromTop = window.scrollY;
+
+  links.forEach(link => {
+    let section = document.querySelector(link.hash);
+    if (
+      section.offsetTop <= fromTop + 100 &&
+      section.offsetTop + section.offsetHeight > fromTop
+    ) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
+});
 
 loadSongs();
 

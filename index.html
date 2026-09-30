@@ -4,222 +4,144 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Lil Tezar Music</title>
+<title>Lil Tezar App</title>
 
 <style>
 body {
-  margin: 0;
-  font-family: Arial;
-  background: #0b0b0b;
-  color: white;
-  scroll-behavior: smooth;
+  margin:0;
+  font-family:Arial;
+  background:#0b0b0b;
+  color:white;
 }
 
 /* NAV */
 .nav {
-  position: sticky;
-  top: 0;
-  background: #0b0b0b;
-  display: flex;
-  justify-content: space-around;
-  padding: 12px;
-  border-bottom: 1px solid #222;
-  z-index: 1000;
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+  background:#111;
+  padding:10px 0;
 }
 
 .nav a {
-  color: #aaa;
-  text-decoration: none;
-  font-weight: bold;
+  color:#aaa;
+  text-decoration:none;
 }
 
 .nav a.active {
-  color: red;
+  color:red;
 }
 
-/* HEADER */
-.header {
-  text-align: center;
-  padding: 20px;
+/* SECTIONS */
+.page {
+  display:none;
+  padding:15px;
 }
 
-.top-links a {
-  color: #aaa;
-  text-decoration: none;
+.page.active {
+  display:block;
 }
 
-.top-links span {
-  margin: 0 5px;
-}
-
-/* PROFILE */
-.profile {
-  text-align: center;
-}
-
-.profile img {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  border: 3px solid red;
-}
-
-/* SECTION */
-.section {
-  margin: 20px;
-}
-
-/* SONG CARD */
+/* SONG */
 .song {
-  display: flex;
-  background: #1a1a1a;
-  padding: 10px;
-  border-radius: 15px;
-  margin-bottom: 10px;
-  transition: 0.2s;
-}
-
-.song:hover {
-  background: #222;
+  display:flex;
+  background:#1a1a1a;
+  padding:10px;
+  border-radius:15px;
+  margin-bottom:10px;
 }
 
 .song img {
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
-  margin-right: 10px;
-}
-
-/* BUTTONS */
-.buttons button {
-  margin-top: 5px;
-  margin-right: 5px;
-  background: #333;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 8px;
-  color: white;
-}
-
-.buttons button:hover {
-  background: red;
-}
-
-/* VIDEO CARD */
-.video-card {
-  position: relative;
-  margin-bottom: 15px;
-  cursor: pointer;
-}
-
-.video-card img {
-  width: 100%;
-  border-radius: 15px;
-}
-
-.video-card span {
-  position: absolute;
-  top: 40%;
-  left: 45%;
-  font-size: 30px;
-  background: rgba(0,0,0,0.6);
-  padding: 10px;
-  border-radius: 50%;
+  width:60px;
+  height:60px;
+  border-radius:10px;
+  margin-right:10px;
 }
 
 /* PLAYER */
-#player {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #111;
-  padding: 10px;
-  display: none;
-}
-
-audio {
-  width: 100%;
+.player {
+  position:fixed;
+  bottom:60px;
+  width:100%;
+  background:#111;
+  padding:10px;
+  display:none;
 }
 </style>
 </head>
 
 <body>
 
-<!-- NAV -->
-<div class="nav">
-  <a href="#music" class="active">Music</a>
-  <a href="#videos">Videos</a>
-  <a href="#photos">Photos</a>
-</div>
+<!-- HOME -->
+<div id="home" class="page active">
+  <h2>Home</h2>
 
-<!-- HEADER -->
-<div class="header">
-  <h1>🎵 LIL TEZAR</h1>
-  <div class="top-links">
-    <a href="#music">Music</a> •
-    <a href="#stories">Stories</a> •
-    <a href="#vibes">Vibes</a>
-  </div>
-</div>
+  <h3>Recent Music</h3>
+  <div id="homeSongs"></div>
 
-<!-- PROFILE -->
-<div class="profile">
-  <img src="profile.jpg">
-  <h2>LIL TEZAR ✔</h2>
+  <h3>Latest Video</h3>
+  <div id="homeVideo"></div>
+
+  <h3>Photos</h3>
+  <img src="profile.jpg" style="width:100%;border-radius:15px;">
 </div>
 
 <!-- MUSIC -->
-<div class="section" id="music">
-  <h2>Latest Music</h2>
-  <div id="songs"></div>
+<div id="music" class="page">
+  <h2>Music</h2>
+  <div id="musicList"></div>
 </div>
 
 <!-- VIDEOS -->
-<div class="section" id="videos">
+<div id="videos" class="page">
   <h2>Videos</h2>
 
-  <div class="video-card" onclick="playVideo('NGamrf4B8FI')">
-    <img src="https://img.youtube.com/vi/NGamrf4B8FI/0.jpg">
-    <span>▶</span>
+  <div onclick="playVideo('NGamrf4B8FI')">
+    <img src="https://img.youtube.com/vi/NGamrf4B8FI/0.jpg" style="width:100%;border-radius:15px;">
   </div>
 
   <div id="videoPlayer"></div>
 </div>
 
 <!-- PHOTOS -->
-<div class="section" id="photos">
+<div id="photos" class="page">
   <h2>Photos</h2>
-  <img src="profile.jpg" style="width:100%; border-radius:15px;">
-</div>
-
-<!-- STORIES -->
-<div class="section" id="stories">
-  <h2>Stories</h2>
-  <p>Coming soon...</p>
-</div>
-
-<!-- VIBES -->
-<div class="section" id="vibes">
-  <h2>Vibes</h2>
-  <p>Behind the scenes content.</p>
+  <img src="profile.jpg" style="width:100%;border-radius:15px;">
 </div>
 
 <!-- PLAYER -->
-<div id="player">
+<div class="player" id="player">
   <audio id="audio" controls></audio>
+</div>
+
+<!-- NAV BAR -->
+<div class="nav">
+  <a onclick="showPage('home')" class="active">Home</a>
+  <a onclick="showPage('music')">Music</a>
+  <a onclick="showPage('videos')">Videos</a>
+  <a onclick="showPage('photos')">Photos</a>
 </div>
 
 <script>
 const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
 const SUPABASE_KEY = "YOUR_KEY";
 
-const songsDiv = document.getElementById("songs");
+let songs = [];
 const audio = document.getElementById("audio");
 const player = document.getElementById("player");
 
-let currentIndex = 0;
-let songsList = [];
+/* PAGE SWITCH */
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 
+  document.querySelectorAll(".nav a").forEach(a => a.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+/* LOAD SONGS */
 async function loadSongs() {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`, {
     headers: {
@@ -228,68 +150,48 @@ async function loadSongs() {
     }
   });
 
-  songsList = await res.json();
+  songs = await res.json();
 
-  songsList.forEach((song, index) => {
-    const el = document.createElement("div");
-    el.className = "song";
-
-    el.innerHTML = `
-      <img src="${song.cover_url}">
-      <div>
-        <b>${song.title}</b><br>
-        <small>${song.artist}</small>
-        <div class="buttons">
-          <button onclick="playSong(${index})">▶</button>
-          <button onclick="window.open('${song.audio_url}')">⬇</button>
+  songs.forEach((song, i) => {
+    const html = `
+      <div class="song">
+        <img src="${song.cover_url}">
+        <div>
+          <b>${song.title}</b><br>
+          <small>${song.artist}</small><br>
+          <button onclick="playSong(${i})">▶</button>
         </div>
       </div>
     `;
 
-    songsDiv.appendChild(el);
+    document.getElementById("musicList").innerHTML += html;
+
+    if (i < 2) {
+      document.getElementById("homeSongs").innerHTML += html;
+    }
   });
+
+  /* HOME VIDEO */
+  document.getElementById("homeVideo").innerHTML = `
+    <iframe width="100%" height="200"
+    src="https://www.youtube.com/embed/NGamrf4B8FI"
+    frameborder="0"></iframe>`;
 }
 
-function playSong(index) {
-  currentIndex = index;
-  audio.src = songsList[index].audio_url;
+/* PLAYER */
+function playSong(i) {
+  audio.src = songs[i].audio_url;
   player.style.display = "block";
   audio.play();
 }
 
-/* AUTO NEXT SONG */
-audio.addEventListener("ended", () => {
-  currentIndex++;
-  if (currentIndex < songsList.length) {
-    playSong(currentIndex);
-  }
-});
-
 /* VIDEO */
 function playVideo(id) {
   document.getElementById("videoPlayer").innerHTML =
-    `<iframe width="100%" height="220"
+    `<iframe width="100%" height="200"
     src="https://www.youtube.com/embed/${id}?autoplay=1"
-    frameborder="0" allowfullscreen></iframe>`;
+    frameborder="0"></iframe>`;
 }
-
-/* ACTIVE NAV */
-const links = document.querySelectorAll(".nav a");
-window.addEventListener("scroll", () => {
-  let fromTop = window.scrollY;
-
-  links.forEach(link => {
-    let section = document.querySelector(link.hash);
-    if (
-      section.offsetTop <= fromTop + 100 &&
-      section.offsetTop + section.offsetHeight > fromTop
-    ) {
-      link.classList.add("active");
-    } else {
-      link.classList.remove("active");
-    }
-  });
-});
 
 loadSongs();
 

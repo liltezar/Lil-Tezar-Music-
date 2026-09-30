@@ -14,7 +14,6 @@ body {
   color:white;
 }
 
-/* NAV */
 .nav {
   position:fixed;
   bottom:0;
@@ -25,27 +24,12 @@ body {
   padding:10px 0;
 }
 
-.nav a {
-  color:#aaa;
-  text-decoration:none;
-}
+.nav a { color:#aaa; text-decoration:none; }
+.nav a.active { color:red; }
 
-.nav a.active {
-  color:red;
-}
+.page { display:none; padding:15px; padding-bottom:80px; }
+.page.active { display:block; }
 
-/* PAGE */
-.page {
-  display:none;
-  padding:15px;
-  padding-bottom:80px;
-}
-
-.page.active {
-  display:block;
-}
-
-/* SONG */
 .song {
   display:flex;
   background:#1a1a1a;
@@ -61,26 +45,20 @@ body {
   margin-right:10px;
 }
 
-/* PHOTO GRID */
 .grid {
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
 
-.grid img {
-  width:100%;
-  border-radius:10px;
-}
+.grid img { width:100%; border-radius:10px; }
 
-/* VIDEO */
 .video img {
   width:100%;
   border-radius:10px;
   margin-bottom:10px;
 }
 
-/* PLAYER */
 .player {
   position:fixed;
   bottom:60px;
@@ -96,7 +74,6 @@ button {
   border:none;
   padding:5px 8px;
   border-radius:8px;
-  margin-top:5px;
 }
 </style>
 </head>
@@ -106,65 +83,8 @@ button {
 <!-- HOME -->
 <div id="home" class="page active">
 
-<!-- PROFILE + SUBSCRIBE -->
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;">
-
-  <div style="display:flex;align-items:center;gap:10px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+  <div style="display:flex;gap:10px;align-items:center;">
     <img src="profile.jpg" style="width:45px;height:45px;border-radius:50%;border:2px solid red;">
     <div>
       <b>Lil Tezar</b><br>
-      <small style="color:#aaa;">Artist</small>
-    </div>
-  </div>
-
-  <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank"
-  style="background:red;color:white;padding:6px 12px;border-radius:20px;text-decoration:none;">
-  ▶ Subscribe
-  </a>
-
-</div>
-
-<h2>Home</h2>
-
-<h3>Recently Added</h3>
-<div id="homeSongs"></div>
-
-<h3>Latest Video</h3>
-<div id="homeVideo"></div>
-
-</div>
-
-<!-- MUSIC -->
-<div id="music" class="page">
-<h2>Music</h2>
-<div id="musicList"></div>
-</div>
-
-<!-- VIDEOS -->
-<div id="videos" class="page">
-<h2>Videos</h2>
-<div id="videoList"></div>
-<div id="videoPlayer"></div>
-</div>
-
-<!-- PHOTOS -->
-<div id="photos" class="page">
-<h2>Photos</h2>
-<div class="grid" id="photoGrid"></div>
-</div>
-
-<!-- PLAYER -->
-<div class="player" id="player">
-<audio id="audio" controls></audio>
-</div>
-
-<!-- NAV -->
-<div class="nav">
-<a onclick="showPage(event,'home')" class="active">Home</a>
-<a onclick="showPage(event,'music')">Music</a>
-<a onclick="showPage(event,'videos')">Videos</a>
-<a onclick="showPage(event,'photos')">Photos</a>
-</div>
-
-<script>
-const SUPABASE_URL = "https://ujuwvkzzxiw

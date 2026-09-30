@@ -1,47 +1,18 @@
-const CACHE_NAME = "lil-tezar-v2";
+const CACHE_NAME = "lil-tezar-v3";
 
-const STATIC_FILES = [
-  "./",
-  "./index.html"
-];
-
-// INSTALL (cache app)
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(STATIC_FILES);
-    })
-  );
+self.addEventListener("install", e => {
   self.skipWaiting();
 });
 
-// ACTIVATE (clean old cache)
-self.addEventListener("activate", event => {
-  event.waitUntil(
+self.addEventListener("activate", e => {
+  e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      )
+      Promise.all(keys.map(k => caches.delete(k)))
     )
   );
+  self.clients.claim();
 });
 
-// FETCH (offline support)
 self.addEventListener("fetch", event => {
-  event.respondWith(
-    fetch(event.request)
-      .then(res => {
-        // Save new requests
-        const copy = res.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, copy);
-        });
-        return res;
-      })
-      .catch(() => caches.match(event.request))
-  );
+  event.respondWith(fetch(event.request));
 });

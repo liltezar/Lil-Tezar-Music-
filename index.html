@@ -65,7 +65,7 @@ border-radius:8px;
 object-fit:cover;
 }
 
-/* PLAYER MODAL */
+/* PLAYER */
 #playerBox{
 position:fixed;
 bottom:0;
@@ -84,14 +84,37 @@ border-radius:10px;
 margin-bottom:10px;
 }
 
+/* CONTROLS */
+.controls{
+text-align:center;
+margin-top:10px;
+}
+
 .controls button{
-font-size:18px;
-margin:10px;
-padding:10px;
-border:none;
+width:55px;
+height:55px;
+margin:8px;
 border-radius:50%;
+border:none;
 background:#222;
 color:white;
+font-size:18px;
+}
+
+#playBtn{
+width:70px;
+height:70px;
+font-size:22px;
+background:red;
+}
+
+#downloadBtn{
+width:auto;
+height:auto;
+padding:8px 15px;
+border-radius:20px;
+font-size:14px;
+background:#333;
 }
 </style>
 </head>
@@ -128,9 +151,17 @@ color:white;
 <audio id="audio"></audio>
 
 <div class="controls">
+
 <button onclick="prevSong()">⏪</button>
-<button onclick="togglePlay()">▶️</button>
+
+<button id="playBtn" onclick="togglePlay()">▶️</button>
+
 <button onclick="nextSong()">⏩</button>
+
+<br>
+
+<button id="downloadBtn">⬇ Download</button>
+
 </div>
 
 </div>
@@ -188,16 +219,27 @@ audio.src = song.audio_url;
 audio.play();
 
 playing = true;
+document.getElementById("playBtn").innerText = "⏸";
+
 document.getElementById("playerBox").style.display = "block";
+
+/* DOWNLOAD BUTTON */
+document.getElementById("downloadBtn").onclick = function(){
+window.open(song.audio_url);
+};
 }
 
 /* PLAY / PAUSE */
 function togglePlay(){
+const btn = document.getElementById("playBtn");
+
 if(playing){
 audio.pause();
+btn.innerText = "▶️";
 playing = false;
 }else{
 audio.play();
+btn.innerText = "⏸";
 playing = true;
 }
 }

@@ -14,7 +14,6 @@ background:#0b0b0b;
 color:white;
 }
 
-/* HEADER */
 .header{
 display:flex;
 align-items:center;
@@ -43,7 +42,14 @@ border-radius:20px;
 text-decoration:none;
 }
 
-/* SONG LIST */
+#searchBox{
+width:90%;
+margin:10px;
+padding:10px;
+border:none;
+border-radius:10px;
+}
+
 .song{
 display:flex;
 background:#1a1a1a;
@@ -60,7 +66,6 @@ border-radius:10px;
 margin-right:10px;
 }
 
-/* PLAYER */
 #playerBox{
 display:none;
 position:fixed;
@@ -90,16 +95,6 @@ border-radius:10px;
 font-size:16px;
 }
 
-/* SEARCH */
-#searchBox{
-width:90%;
-margin:10px;
-padding:10px;
-border:none;
-border-radius:10px;
-}
-
-/* ADMIN */
 #adminLogin, #adminPanel{
 padding:15px;
 }
@@ -116,9 +111,7 @@ border:none;
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-
 <div class="profile">
 <img src="profile.jpg">
 <div>
@@ -130,22 +123,16 @@ border:none;
 <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank" class="subscribe">
 ▶ Subscribe
 </a>
-
 </div>
 
-<!-- SEARCH -->
 <input id="searchBox" placeholder="Search songs...">
-
-<!-- SONG LIST -->
 <div id="songList"></div>
 
-<!-- PLAYER -->
 <div id="playerBox">
-
 <img id="cover">
 <h3 id="title"></h3>
 
-<audio id="audio"></audio>
+<audio id="audio" controls></audio>
 
 <div class="controls">
 <button onclick="prevSong()">⏪</button>
@@ -155,10 +142,9 @@ border:none;
 <button id="downloadBtn">⬇ Download</button>
 <button onclick="closePlayer()">❌ Close</button>
 </div>
-
 </div>
 
-<!-- ADMIN LOGIN -->
+<!-- ADMIN -->
 <div id="adminLogin">
 <h3>Admin Login</h3>
 <input id="adminUser" placeholder="Username">
@@ -167,14 +153,13 @@ border:none;
 <p id="adminMsg"></p>
 </div>
 
-<!-- ADMIN PANEL -->
 <div id="adminPanel" style="display:none;">
 <h3>Upload Song</h3>
 
 <input id="titleInput" placeholder="Song Title">
 <input id="artistInput" placeholder="Artist">
-<input id="audioInput" placeholder="Audio URL">
-<input id="coverInput" placeholder="Cover URL">
+<input id="audioInput" placeholder="Audio URL (Supabase)">
+<input id="coverInput" placeholder="Cover URL (Supabase)">
 
 <button onclick="uploadSong()">Upload</button>
 <button onclick="logout()">Logout</button>
@@ -192,6 +177,7 @@ const audio = document.getElementById("audio");
 
 /* LOAD SONGS */
 async function loadSongs(){
+try{
 const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`,{
 headers:{
 apikey:SUPABASE_KEY,
@@ -199,35 +185,52 @@ Authorization:`Bearer ${SUPABASE_KEY}`
 }
 });
 
-songs = await res.json();
+const data = await res.json();
+
+if(!Array.isArray(data)){
+console.log(data);
+alert("Error loading songs");
+return;
+}
+
+songs = data;
+
+if(songs.length === 0){
+songList.innerHTML = "<p style='padding:10px'>No songs yet</p>";
+return;
+}
+
 renderSongs(songs);
+
+}catch(err){
+console.log(err);
+alert("Failed to load songs");
+}
 }
 
 /* RENDER */
 function renderSongs(list){
-const box = document.getElementById("songList");
-box.innerHTML = "";
+songList.innerHTML = "";
 
 list.forEach((song,i)=>{
-box.innerHTML += `
+songList.innerHTML += `
 <div class="song" onclick="openPlayer(${i})">
-<img src="${song.cover_url}">
+<img src="${song.cover_url || 'https://via.placeholder.com/150'}">
 <div>
 <b>${song.title}</b><br>
-<small>${song.artist}</small>
+<small>${song.artist || ''}</small>
 </div>
-</div>
-`;
+</div>`;
 });
 }
 
 /* SEARCH */
-document.getElementById("searchBox").addEventListener("input",function(){
-const value = this.value.toLowerCase();
+searchBox.addEventListener("input",function(){
+const v = this.value.toLowerCase();
 
-const filtered = songs.filter(song =>
-song.title.toLowerCase().includes(value) ||
-(song.artist || "").toLowerCase().includes(value)
+const filtered = songs.filter(s =>
+(s.title || "").toLowerCase().includes(v) ||
+(s.artist || "").toLowerCase().includes(v)
 );
 
 renderSongs(filtered);
@@ -236,77 +239,68 @@ renderSongs(filtered);
 /* PLAYER */
 function openPlayer(i){
 current = i;
-
 const song = songs[i];
 
-document.getElementById("cover").src = song.cover_url;
-document.getElementById("title").innerText = song.title;
+cover.src = song.cover_url;
+title.innerText = song.title;
 
 audio.src = song.audio_url;
 audio.play();
 
 playing = true;
-document.getElementById("playBtn").innerText = "⏸";
+playBtn.innerText = "⏸";
 
-document.getElementById("playerBox").style.display = "block";
+playerBox.style.display = "block";
 
-document.getElementById("downloadBtn").onclick = function(){
-window.open(song.audio_url);
-};
+downloadBtn.onclick = ()=>window.open(song.audio_url);
 }
 
 function togglePlay(){
-const btn = document.getElementById("playBtn");
-
 if(playing){
 audio.pause();
-btn.innerText = "▶️";
+playBtn.innerText = "▶️";
 playing = false;
 }else{
 audio.play();
-btn.innerText = "⏸";
+playBtn.innerText = "⏸";
 playing = true;
 }
 }
 
 function nextSong(){
-current++;
-if(current >= songs.length) current = 0;
+current = (current+1)%songs.length;
 openPlayer(current);
 }
 
 function prevSong(){
-current--;
-if(current < 0) current = songs.length - 1;
+current = (current-1+songs.length)%songs.length;
 openPlayer(current);
 }
 
 function closePlayer(){
-document.getElementById("playerBox").style.display = "none";
+playerBox.style.display = "none";
 audio.pause();
 }
 
 /* ADMIN LOGIN */
 function adminLogin(){
-const user = document.getElementById("adminUser").value;
-const pass = document.getElementById("adminPass").value;
+const u = adminUser.value;
+const p = adminPass.value;
 
-if(user === "Lil Tezar" && pass === "Vini123##$$"){
+if(u==="Lil Tezar" && p==="Vini123##$$"){
 localStorage.setItem("admin","true");
-document.getElementById("adminLogin").style.display = "none";
-document.getElementById("adminPanel").style.display = "block";
+adminLogin.style.display="none";
+adminPanel.style.display="block";
 }else{
-document.getElementById("adminMsg").innerText = "Wrong login ❌";
+adminMsg.innerText="Wrong login ❌";
 }
 }
 
-/* AUTO LOGIN */
-if(localStorage.getItem("admin") === "true"){
-document.getElementById("adminLogin").style.display = "none";
-document.getElementById("adminPanel").style.display = "block";
+if(localStorage.getItem("admin")==="true"){
+adminLogin.style.display="none";
+adminPanel.style.display="block";
 }
 
-/* LOGOUT */
 function logout(){
 localStorage.removeItem("admin");
 location.reload();
@@ -314,11 +308,15 @@ location.reload();
 
 /* UPLOAD */
 async function uploadSong(){
+const title = titleInput.value;
+const artist = artistInput.value;
+const audio_url = audioInput.value;
+const cover_url = coverInput.value;
 
-const title = document.getElementById("titleInput").value;
-const artist = document.getElementById("artistInput").value;
-const audio_url = document.getElementById("audioInput").value;
-const cover_url = document.getElementById("coverInput").value;
+if(!audio_url){
+alert("Audio URL required");
+return;
+}
 
 await fetch(`${SUPABASE_URL}/rest/v1/songs`,{
 method:"POST",

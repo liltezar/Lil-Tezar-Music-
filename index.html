@@ -43,7 +43,7 @@ border-radius:20px;
 text-decoration:none;
 }
 
-/* SONG LIST */
+/* SONG */
 .song{
 display:flex;
 background:#1a1a1a;
@@ -80,14 +80,15 @@ border-radius:15px;
 margin-top:40px;
 }
 
+/* CONTROLS */
 .controls button{
 background:#222;
 color:white;
 border:none;
-padding:10px;
+padding:12px;
 margin:5px;
 border-radius:10px;
-font-size:16px;
+font-size:18px;
 }
 
 /* SEARCH */
@@ -111,6 +112,27 @@ margin-bottom:8px;
 border-radius:8px;
 border:none;
 }
+
+/* PROGRESS BAR */
+.progressWrap{
+margin-top:10px;
+background:#222;
+height:10px;
+border-radius:10px;
+}
+
+#progressBar{
+height:10px;
+width:0%;
+background:red;
+border-radius:10px;
+}
+
+#progressText{
+font-size:12px;
+margin-top:5px;
+color:#aaa;
+}
 </style>
 </head>
 
@@ -118,7 +140,6 @@ border:none;
 
 <!-- HEADER -->
 <div class="header">
-
 <div class="profile">
 <img src="profile.jpg">
 <div>
@@ -130,7 +151,6 @@ border:none;
 <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank" class="subscribe">
 ▶ Subscribe
 </a>
-
 </div>
 
 <!-- SEARCH -->
@@ -141,7 +161,6 @@ border:none;
 
 <!-- PLAYER -->
 <div id="playerBox">
-
 <img id="cover">
 <h3 id="title"></h3>
 
@@ -155,7 +174,6 @@ border:none;
 <button id="downloadBtn">⬇ Download</button>
 <button onclick="closePlayer()">❌ Close</button>
 </div>
-
 </div>
 
 <!-- ADMIN LOGIN -->
@@ -173,11 +191,19 @@ border:none;
 
 <input id="titleInput" placeholder="Song Title">
 <input id="artistInput" placeholder="Artist">
-<input id="audioInput" placeholder="Audio URL">
-<input id="coverInput" placeholder="Cover URL">
+
+<input type="file" id="audioFile" accept="audio/*">
+<input type="file" id="coverFile" accept="image/*">
 
 <button onclick="uploadSong()">Upload</button>
 <button onclick="logout()">Logout</button>
+
+<!-- PROGRESS -->
+<div class="progressWrap">
+<div id="progressBar"></div>
+</div>
+<p id="progressText">0%</p>
+
 </div>
 
 <script>
@@ -236,7 +262,6 @@ renderSongs(filtered);
 /* PLAYER */
 function openPlayer(i){
 current = i;
-
 const song = songs[i];
 
 document.getElementById("cover").src = song.cover_url;
@@ -312,14 +337,67 @@ localStorage.removeItem("admin");
 location.reload();
 }
 
-/* UPLOAD */
+/* UPLOAD WITH PROGRESS */
 async function uploadSong(){
 
 const title = document.getElementById("titleInput").value;
 const artist = document.getElementById("artistInput").value;
-const audio_url = document.getElementById("audioInput").value;
-const cover_url = document.getElementById("coverInput").value;
 
+const audioFile = document.getElementById("audioFile").files[0];
+const coverFile = document.getElementById("coverFile").files[0];
+
+if(!audioFile || !coverFile){
+alert("Select files first");
+return;
+}
+
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+
+const audioName = Date.now() + "_" + audioFile.name;
+const coverName = Date.now() + "_" + coverFile.name;
+
+/* AUDIO */
+await new Promise(resolve=>{
+const xhr = new XMLHttpRequest();
+
+xhr.upload.onprogress = e=>{
+if(e.lengthComputable){
+let p = Math.round((e.loaded/e.total)*50);
+progressBar.style.width = p+"%";
+progressText.innerText = p+"%";
+}
+};
+
+xhr.onload = resolve;
+xhr.open("POST", `${SUPABASE_URL}/storage/v1/object/music/${audioName}`);
+xhr.setRequestHeader("apikey", SUPABASE_KEY);
+xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
+xhr.setRequestHeader("Content-Type", audioFile.type);
+xhr.send(audioFile);
+});
+
+/* COVER */
+await new Promise(resolve=>{
+const xhr = new XMLHttpRequest();
+
+xhr.upload.onprogress = e=>{
+if(e.lengthComputable){
+let p = 50 + Math.round((e.loaded/e.total)*50);
+progressBar.style.width = p+"%";
+progressText.innerText = p+"%";
+}
+};
+
+xhr.onload = resolve;
+xhr.open("POST", `${SUPABASE_URL}/storage/v1/object/cover/${coverName}`);
+xhr.setRequestHeader("apikey", SUPABASE_KEY);
+xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
+xhr.setRequestHeader("Content-Type", coverFile.type);
+xhr.send(coverFile);
+});
+
+/* SAVE */
 await fetch(`${SUPABASE_URL}/rest/v1/songs`,{
 method:"POST",
 headers:{
@@ -330,13 +408,15 @@ Authorization:`Bearer ${SUPABASE_KEY}`
 body:JSON.stringify({
 title,
 artist,
-audio_url,
-cover_url
+audio_url:`${SUPABASE_URL}/storage/v1/object/public/music/${audioName}`,
+cover_url:`${SUPABASE_URL}/storage/v1/object/public/cover/${coverName}`
 })
 });
 
-alert("Uploaded ✅");
-location.reload();
+progressBar.style.width="100%";
+progressText.innerText="Upload complete 🚀";
+
+setTimeout(()=>location.reload(),1000);
 }
 
 /* INIT */

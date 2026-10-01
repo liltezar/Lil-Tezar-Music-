@@ -14,6 +14,35 @@ background:#0b0b0b;
 color:white;
 }
 
+/* HEADER */
+.header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:15px;
+}
+
+.profile{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.profile img{
+width:45px;
+height:45px;
+border-radius:50%;
+border:2px solid red;
+}
+
+.subscribe{
+background:red;
+color:white;
+padding:6px 12px;
+border-radius:20px;
+text-decoration:none;
+}
+
 /* SONG LIST */
 .song{
 display:flex;
@@ -86,6 +115,23 @@ border:none;
 </head>
 
 <body>
+
+<!-- HEADER -->
+<div class="header">
+
+<div class="profile">
+<img src="profile.jpg">
+<div>
+<b>Lil Tezar</b><br>
+<small style="color:#aaa;">Artist</small>
+</div>
+</div>
+
+<a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank" class="subscribe">
+▶ Subscribe
+</a>
+
+</div>
 
 <!-- SEARCH -->
 <input id="searchBox" placeholder="Search songs...">

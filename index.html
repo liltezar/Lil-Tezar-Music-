@@ -17,8 +17,8 @@ color:white;
 /* HEADER */
 .header{
 display:flex;
-align-items:center;
 justify-content:space-between;
+align-items:center;
 padding:15px;
 }
 
@@ -47,18 +47,18 @@ text-decoration:none;
 #searchBox{
 width:90%;
 margin:10px;
-padding:10px;
-border:none;
+padding:12px;
 border-radius:10px;
+border:none;
 }
 
 /* SONG LIST */
 .song{
 display:flex;
 background:#1a1a1a;
+margin:10px;
 padding:10px;
 border-radius:12px;
-margin:10px;
 cursor:pointer;
 }
 
@@ -83,9 +83,13 @@ text-align:center;
 }
 
 #playerBox img{
-width:220px;
+width:70%;
+margin-top:40px;
 border-radius:15px;
-margin-top:60px;
+}
+
+.controls{
+margin-top:20px;
 }
 
 .controls button{
@@ -94,23 +98,23 @@ color:white;
 border:none;
 padding:15px;
 margin:10px;
-border-radius:12px;
-font-size:18px;
+border-radius:15px;
+font-size:20px;
 }
 
 /* ADMIN */
+#adminLogin, #adminPanel{
+padding:15px;
+}
+
 input{
-width:90%;
-margin:5px;
+width:100%;
 padding:10px;
-border-radius:8px;
+margin:5px 0;
+border-radius:10px;
 border:none;
 }
 
-progress{
-width:90%;
-margin:10px;
-}
 </style>
 </head>
 
@@ -169,17 +173,205 @@ margin:10px;
 <input id="titleInput" placeholder="Song Title">
 <input id="artistInput" placeholder="Artist">
 
-<label>Audio File (music bucket)</label>
+<p>Audio File</p>
 <input type="file" id="audioFile">
 
-<label>Cover Image (cover bucket)</label>
+<p>Cover Image</p>
 <input type="file" id="coverFile">
 
 <button onclick="uploadSong()">Upload</button>
 <button onclick="logout()">Logout</button>
-
-<progress id="progressBar" value="0" max="100"></progress>
 </div>
 
 <script>
-const SUPABASE_URL =
+const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
+const SUPABASE_KEY = "sb_publishable_7zCr4dg-xaj7I7syGO685g_Fk_fIbFS";
+
+let songs = [];
+let current = 0;
+let playing = false;
+
+const audio = document.getElementById("audio");
+
+/* LOAD SONGS */
+async function loadSongs(){
+const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`,{
+headers:{
+apikey:SUPABASE_KEY,
+Authorization:`Bearer ${SUPABASE_KEY}`
+}
+});
+
+songs = await res.json();
+renderSongs(songs);
+}
+
+/* RENDER */
+function renderSongs(list){
+const box = document.getElementById("songList");
+box.innerHTML="";
+
+list.forEach((song,i)=>{
+box.innerHTML += `
+<div class="song" onclick="openPlayer(${i})">
+<img src="${song.cover_url}">
+<div>
+<b>${song.title}</b><br>
+<small>${song.artist}</small>
+</div>
+</div>
+`;
+});
+}
+
+/* SEARCH */
+document.getElementById("searchBox").addEventListener("input",function(){
+const value = this.value.toLowerCase();
+
+const filtered = songs.filter(song =>
+song.title.toLowerCase().includes(value) ||
+(song.artist || "").toLowerCase().includes(value)
+);
+
+renderSongs(filtered);
+});
+
+/* PLAYER */
+function openPlayer(i){
+current = i;
+const song = songs[i];
+
+document.getElementById("cover").src = song.cover_url;
+document.getElementById("title").innerText = song.title;
+
+audio.src = song.audio_url;
+audio.play();
+
+playing = true;
+document.getElementById("playBtn").innerText = "⏸";
+
+document.getElementById("playerBox").style.display = "block";
+
+document.getElementById("downloadBtn").onclick = function(){
+window.open(song.audio_url);
+};
+}
+
+function togglePlay(){
+if(playing){
+audio.pause();
+playBtn.innerText="▶️";
+playing=false;
+}else{
+audio.play();
+playBtn.innerText="⏸";
+playing=true;
+}
+}
+
+function nextSong(){
+current = (current + 1) % songs.length;
+openPlayer(current);
+}
+
+function prevSong(){
+current = (current - 1 + songs.length) % songs.length;
+openPlayer(current);
+}
+
+/* ADMIN LOGIN */
+function adminLogin(){
+const user = document.getElementById("adminUser").value;
+const pass = document.getElementById("adminPass").value;
+
+if(user==="Lil Tezar" && pass==="Vini123##$$"){
+localStorage.setItem("admin","true");
+adminLogin.style.display="none";
+adminPanel.style.display="block";
+}else{
+adminMsg.innerText="Wrong login ❌";
+}
+}
+
+/* AUTO LOGIN */
+if(localStorage.getItem("admin")==="true"){
+adminLogin.style.display="none";
+adminPanel.style.display="block";
+}
+
+/* LOGOUT */
+function logout(){
+localStorage.removeItem("admin");
+location.reload();
+}
+
+/* UPLOAD FILES */
+async function uploadSong(){
+
+const title = titleInput.value;
+const artist = artistInput.value;
+
+const audioFile = document.getElementById("audioFile").files[0];
+const coverFile = document.getElementById("coverFile").files[0];
+
+if(!audioFile || !coverFile){
+alert("Select both files");
+return;
+}
+
+/* upload audio */
+const audioPath = `music/${Date.now()}_${audioFile.name}`;
+
+await fetch(`${SUPABASE_URL}/storage/v1/object/music/${audioPath}`,{
+method:"POST",
+headers:{
+apikey:SUPABASE_KEY,
+Authorization:`Bearer ${SUPABASE_KEY}`,
+"Content-Type":audioFile.type
+},
+body:audioFile
+});
+
+/* upload cover */
+const coverPath = `cover/${Date.now()}_${coverFile.name}`;
+
+await fetch(`${SUPABASE_URL}/storage/v1/object/cover/${coverPath}`,{
+method:"POST",
+headers:{
+apikey:SUPABASE_KEY,
+Authorization:`Bearer ${SUPABASE_KEY}`,
+"Content-Type":coverFile.type
+},
+body:coverFile
+});
+
+/* public URLs */
+const audio_url = `${SUPABASE_URL}/storage/v1/object/public/music/${audioPath}`;
+const cover_url = `${SUPABASE_URL}/storage/v1/object/public/cover/${coverPath}`;
+
+/* save to DB */
+await fetch(`${SUPABASE_URL}/rest/v1/songs`,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+apikey:SUPABASE_KEY,
+Authorization:`Bearer ${SUPABASE_KEY}`
+},
+body:JSON.stringify({
+title,
+artist,
+audio_url,
+cover_url
+})
+});
+
+alert("Uploaded ✅");
+location.reload();
+}
+
+/* INIT */
+loadSongs();
+</script>
+
+</body>
+</html>

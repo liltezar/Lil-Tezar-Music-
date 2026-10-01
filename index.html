@@ -31,12 +31,17 @@ background:#222;color:white;border:none;padding:12px;margin:5px;
 border-radius:10px;font-size:18px;
 }
 
+input{
+width:90%;margin:5px;padding:10px;border-radius:10px;border:none;
+}
+
 #progressBar{width:0%;height:10px;background:red;border-radius:10px;}
 </style>
 </head>
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
 <div class="profile">
 <img src="profile.jpg">
@@ -51,9 +56,13 @@ border-radius:10px;font-size:18px;
 </a>
 </div>
 
+<!-- SEARCH -->
 <input id="searchBox" placeholder="Search songs...">
+
+<!-- SONG LIST -->
 <div id="songList"></div>
 
+<!-- PLAYER -->
 <div id="playerBox">
 <img id="cover">
 <h3 id="title"></h3>
@@ -68,6 +77,37 @@ border-radius:10px;font-size:18px;
 </div>
 </div>
 
+<!-- ADMIN LOGIN -->
+<div id="adminLogin">
+<h3>Admin Login</h3>
+<input id="adminUser" placeholder="Username">
+<input id="adminPass" type="password" placeholder="Password">
+<button onclick="adminLogin()">Login</button>
+<p id="adminMsg"></p>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" style="display:none;">
+<h3>Upload Song</h3>
+
+<input id="titleInput" placeholder="Song Title">
+<input id="artistInput" placeholder="Artist">
+
+<p>🎵 Audio File</p>
+<input type="file" id="audioFile" accept="audio/*">
+
+<p>🖼️ Cover Image (optional)</p>
+<input type="file" id="coverFile" accept="image/*">
+
+<button onclick="uploadSong()">Upload</button>
+<button onclick="logout()">Logout</button>
+
+<div style="background:#222;margin-top:10px;border-radius:10px;width:90%;">
+<div id="progressBar"></div>
+</div>
+<p id="progressText">0%</p>
+</div>
+
 <script>
 const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
 const SUPABASE_KEY = "sb_publishable_7zCr4dg-xaj7I7syGO685g_Fk_fIbFS";
@@ -78,7 +118,7 @@ let playing = false;
 
 const audio = document.getElementById("audio");
 
-/* LOAD SONGS (FIXED) */
+/* LOAD SONGS */
 async function loadSongs(){
 try{
 const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`,{
@@ -90,17 +130,15 @@ Authorization:`Bearer ${SUPABASE_KEY}`
 
 const data = await res.json();
 
-console.log("DATA:", data); // 👈 DEBUG
-
 if(!Array.isArray(data)){
-alert("Supabase error. Check console.");
+alert("Supabase error");
 return;
 }
 
 songs = data;
 
 if(songs.length === 0){
-document.getElementById("songList").innerHTML = "<p style='padding:15px;'>No songs found</p>";
+songList.innerHTML = "<p style='padding:15px;'>No songs yet</p>";
 return;
 }
 
@@ -114,11 +152,10 @@ alert("Failed to load songs");
 
 /* RENDER */
 function renderSongs(list){
-const box = document.getElementById("songList");
-box.innerHTML = "";
+songList.innerHTML = "";
 
 list.forEach((song,i)=>{
-box.innerHTML += `
+songList.innerHTML += `
 <div class="song" onclick="openPlayer(${i})">
 <img src="${song.cover_url}">
 <div>
@@ -189,9 +226,31 @@ current = (current-1+songs.length)%songs.length;
 openPlayer(current);
 }
 
-/* INIT */
-loadSongs();
-</script>
+/* ADMIN LOGIN */
+function adminLogin(){
+if(adminUser.value==="Lil Tezar" && adminPass.value==="Vini123##$$"){
+localStorage.setItem("admin","true");
+adminLogin.style.display="none";
+adminPanel.style.display="block";
+}else{
+adminMsg.innerText="Wrong login ❌";
+}
+}
 
-</body>
-</html>
+if(localStorage.getItem("admin")==="true"){
+adminLogin.style.display="none";
+adminPanel.style.display="block";
+}
+
+function logout(){
+localStorage.removeItem("admin");
+location.reload();
+}
+
+/* UPLOAD */
+async function uploadSong(){
+
+const title = titleInput.value;
+const artist = artistInput.value;
+const audioFile = document.getElementById("audioFile").files[0];
+const cover

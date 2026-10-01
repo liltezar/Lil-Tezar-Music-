@@ -43,7 +43,16 @@ border-radius:20px;
 text-decoration:none;
 }
 
-/* SONG */
+/* SEARCH */
+#searchBox{
+width:90%;
+margin:10px;
+padding:10px;
+border:none;
+border-radius:10px;
+}
+
+/* SONG LIST */
 .song{
 display:flex;
 background:#1a1a1a;
@@ -60,7 +69,7 @@ border-radius:10px;
 margin-right:10px;
 }
 
-/* PLAYER */
+/* PLAYER FULLSCREEN */
 #playerBox{
 display:none;
 position:fixed;
@@ -70,17 +79,18 @@ width:100%;
 height:100%;
 background:#000;
 z-index:999;
-padding:20px;
+justify-content:center;
+align-items:center;
+flex-direction:column;
 text-align:center;
 }
 
 #playerBox img{
-width:200px;
+width:220px;
 border-radius:15px;
-margin-top:40px;
+margin-bottom:20px;
 }
 
-/* CONTROLS */
 .controls button{
 background:#222;
 color:white;
@@ -89,15 +99,6 @@ padding:12px;
 margin:5px;
 border-radius:10px;
 font-size:18px;
-}
-
-/* SEARCH */
-#searchBox{
-width:90%;
-margin:10px;
-padding:10px;
-border:none;
-border-radius:10px;
 }
 
 /* ADMIN */
@@ -113,25 +114,12 @@ border-radius:8px;
 border:none;
 }
 
-/* PROGRESS BAR */
-.progressWrap{
-margin-top:10px;
-background:#222;
-height:10px;
-border-radius:10px;
-}
-
+/* PROGRESS */
 #progressBar{
-height:10px;
 width:0%;
+height:10px;
 background:red;
 border-radius:10px;
-}
-
-#progressText{
-font-size:12px;
-margin-top:5px;
-color:#aaa;
 }
 </style>
 </head>
@@ -172,7 +160,6 @@ color:#aaa;
 <button onclick="nextSong()">⏩</button>
 <br>
 <button id="downloadBtn">⬇ Download</button>
-<button onclick="closePlayer()">❌ Close</button>
 </div>
 </div>
 
@@ -192,18 +179,19 @@ color:#aaa;
 <input id="titleInput" placeholder="Song Title">
 <input id="artistInput" placeholder="Artist">
 
+<p>🎵 Audio File</p>
 <input type="file" id="audioFile" accept="audio/*">
+
+<p>🖼️ Cover Image (optional)</p>
 <input type="file" id="coverFile" accept="image/*">
 
 <button onclick="uploadSong()">Upload</button>
 <button onclick="logout()">Logout</button>
 
-<!-- PROGRESS -->
-<div class="progressWrap">
+<div style="background:#222;margin-top:10px;border-radius:10px;">
 <div id="progressBar"></div>
 </div>
 <p id="progressText">0%</p>
-
 </div>
 
 <script>
@@ -242,8 +230,7 @@ box.innerHTML += `
 <b>${song.title}</b><br>
 <small>${song.artist}</small>
 </div>
-</div>
-`;
+</div>`;
 });
 }
 
@@ -273,129 +260,135 @@ audio.play();
 playing = true;
 document.getElementById("playBtn").innerText = "⏸";
 
-document.getElementById("playerBox").style.display = "block";
+document.getElementById("playerBox").style.display = "flex";
 
-document.getElementById("downloadBtn").onclick = function(){
+document.getElementById("downloadBtn").onclick = ()=>{
 window.open(song.audio_url);
 };
 }
 
-function togglePlay(){
-const btn = document.getElementById("playBtn");
+document.getElementById("playerBox").onclick = function(e){
+if(e.target.id === "playerBox"){
+audio.pause();
+this.style.display = "none";
+}
+};
 
+function togglePlay(){
 if(playing){
 audio.pause();
-btn.innerText = "▶️";
+playBtn.innerText = "▶️";
 playing = false;
 }else{
 audio.play();
-btn.innerText = "⏸";
+playBtn.innerText = "⏸";
 playing = true;
 }
 }
 
 function nextSong(){
-current++;
-if(current >= songs.length) current = 0;
+current = (current+1)%songs.length;
 openPlayer(current);
 }
 
 function prevSong(){
-current--;
-if(current < 0) current = songs.length - 1;
+current = (current-1+songs.length)%songs.length;
 openPlayer(current);
 }
 
-function closePlayer(){
-document.getElementById("playerBox").style.display = "none";
-audio.pause();
-}
-
-/* ADMIN LOGIN */
+/* ADMIN */
 function adminLogin(){
-const user = document.getElementById("adminUser").value;
-const pass = document.getElementById("adminPass").value;
+const u = adminUser.value;
+const p = adminPass.value;
 
-if(user === "Lil Tezar" && pass === "Vini123##$$"){
+if(u==="Lil Tezar" && p==="Vini123##$$"){
 localStorage.setItem("admin","true");
-document.getElementById("adminLogin").style.display = "none";
-document.getElementById("adminPanel").style.display = "block";
+adminLogin.style.display="none";
+adminPanel.style.display="block";
 }else{
-document.getElementById("adminMsg").innerText = "Wrong login ❌";
+adminMsg.innerText="Wrong login";
 }
 }
 
-/* AUTO LOGIN */
-if(localStorage.getItem("admin") === "true"){
-document.getElementById("adminLogin").style.display = "none";
-document.getElementById("adminPanel").style.display = "block";
+if(localStorage.getItem("admin")==="true"){
+adminLogin.style.display="none";
+adminPanel.style.display="block";
 }
 
-/* LOGOUT */
 function logout(){
 localStorage.removeItem("admin");
 location.reload();
 }
 
-/* UPLOAD WITH PROGRESS */
+/* UPLOAD */
 async function uploadSong(){
 
-const title = document.getElementById("titleInput").value;
-const artist = document.getElementById("artistInput").value;
-
-const audioFile = document.getElementById("audioFile").files[0];
+const title = titleInput.value;
+const artist = artistInput.value;
+const audioFile = audioFileInput = document.getElementById("audioFile").files[0];
 const coverFile = document.getElementById("coverFile").files[0];
 
-if(!audioFile || !coverFile){
-alert("Select files first");
+if(!audioFile){
+alert("Select audio file");
 return;
 }
 
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
 
-const audioName = Date.now() + "_" + audioFile.name;
-const coverName = Date.now() + "_" + coverFile.name;
+const audioName = Date.now()+"_"+audioFile.name;
 
 /* AUDIO */
 await new Promise(resolve=>{
 const xhr = new XMLHttpRequest();
 
 xhr.upload.onprogress = e=>{
-if(e.lengthComputable){
-let p = Math.round((e.loaded/e.total)*50);
-progressBar.style.width = p+"%";
-progressText.innerText = p+"%";
-}
+let p = Math.round((e.loaded/e.total)*60);
+progressBar.style.width=p+"%";
+progressText.innerText="Audio "+p+"%";
 };
 
-xhr.onload = resolve;
-xhr.open("POST", `${SUPABASE_URL}/storage/v1/object/music/${audioName}`);
-xhr.setRequestHeader("apikey", SUPABASE_KEY);
-xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
-xhr.setRequestHeader("Content-Type", audioFile.type);
+xhr.onload=resolve;
+
+xhr.open("POST",`${SUPABASE_URL}/storage/v1/object/music/${audioName}`);
+xhr.setRequestHeader("apikey",SUPABASE_KEY);
+xhr.setRequestHeader("Authorization",`Bearer ${SUPABASE_KEY}`);
+xhr.setRequestHeader("Content-Type",audioFile.type);
+
 xhr.send(audioFile);
 });
 
 /* COVER */
-await new Promise(resolve=>{
-const xhr = new XMLHttpRequest();
+let cover_url="";
 
-xhr.upload.onprogress = e=>{
-if(e.lengthComputable){
-let p = 50 + Math.round((e.loaded/e.total)*50);
-progressBar.style.width = p+"%";
-progressText.innerText = p+"%";
-}
+if(coverFile){
+
+const coverName = Date.now()+"_"+coverFile.name;
+
+await new Promise(resolve=>{
+const xhr=new XMLHttpRequest();
+
+xhr.upload.onprogress=e=>{
+let p=60+Math.round((e.loaded/e.total)*40);
+progressBar.style.width=p+"%";
+progressText.innerText="Cover "+p+"%";
 };
 
-xhr.onload = resolve;
-xhr.open("POST", `${SUPABASE_URL}/storage/v1/object/cover/${coverName}`);
-xhr.setRequestHeader("apikey", SUPABASE_KEY);
-xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
-xhr.setRequestHeader("Content-Type", coverFile.type);
+xhr.onload=resolve;
+
+xhr.open("POST",`${SUPABASE_URL}/storage/v1/object/cover/${coverName}`);
+xhr.setRequestHeader("apikey",SUPABASE_KEY);
+xhr.setRequestHeader("Authorization",`Bearer ${SUPABASE_KEY}`);
+xhr.setRequestHeader("Content-Type",coverFile.type);
+
 xhr.send(coverFile);
 });
+
+cover_url=`${SUPABASE_URL}/storage/v1/object/public/cover/${coverName}`;
+
+}else{
+cover_url="https://via.placeholder.com/300x300/111111/FFFFFF?text=No+Cover";
+}
 
 /* SAVE */
 await fetch(`${SUPABASE_URL}/rest/v1/songs`,{
@@ -409,12 +402,11 @@ body:JSON.stringify({
 title,
 artist,
 audio_url:`${SUPABASE_URL}/storage/v1/object/public/music/${audioName}`,
-cover_url:`${SUPABASE_URL}/storage/v1/object/public/cover/${coverName}`
+cover_url
 })
 });
 
-progressBar.style.width="100%";
-progressText.innerText="Upload complete 🚀";
+progressText.innerText="Done 🚀";
 
 setTimeout(()=>location.reload(),1000);
 }

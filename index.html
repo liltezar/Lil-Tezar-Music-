@@ -43,7 +43,16 @@ border-radius:20px;
 text-decoration:none;
 }
 
-/* SONG */
+/* SEARCH */
+#searchBox{
+width:90%;
+margin:10px;
+padding:10px;
+border:none;
+border-radius:10px;
+}
+
+/* SONG LIST */
 .song{
 display:flex;
 background:#1a1a1a;
@@ -60,7 +69,7 @@ border-radius:10px;
 margin-right:10px;
 }
 
-/* PLAYER */
+/* PLAYER FULLSCREEN */
 #playerBox{
 display:none;
 position:fixed;
@@ -70,68 +79,37 @@ width:100%;
 height:100%;
 background:#000;
 z-index:999;
-padding:20px;
 text-align:center;
 }
 
 #playerBox img{
-width:200px;
+width:220px;
 border-radius:15px;
-margin-top:40px;
+margin-top:60px;
 }
 
-/* CONTROLS */
 .controls button{
 background:#222;
 color:white;
 border:none;
-padding:12px;
-margin:5px;
-border-radius:10px;
+padding:15px;
+margin:10px;
+border-radius:12px;
 font-size:18px;
 }
 
-/* SEARCH */
-#searchBox{
-width:90%;
-margin:10px;
-padding:10px;
-border:none;
-border-radius:10px;
-}
-
 /* ADMIN */
-#adminLogin, #adminPanel{
-padding:15px;
-}
-
 input{
-width:100%;
-padding:8px;
-margin-bottom:8px;
+width:90%;
+margin:5px;
+padding:10px;
 border-radius:8px;
 border:none;
 }
 
-/* PROGRESS BAR */
-.progressWrap{
-margin-top:10px;
-background:#222;
-height:10px;
-border-radius:10px;
-}
-
-#progressBar{
-height:10px;
-width:0%;
-background:red;
-border-radius:10px;
-}
-
-#progressText{
-font-size:12px;
-margin-top:5px;
-color:#aaa;
+progress{
+width:90%;
+margin:10px;
 }
 </style>
 </head>
@@ -162,7 +140,7 @@ color:#aaa;
 <!-- PLAYER -->
 <div id="playerBox">
 <img id="cover">
-<h3 id="title"></h3>
+<h2 id="title"></h2>
 
 <audio id="audio"></audio>
 
@@ -172,7 +150,6 @@ color:#aaa;
 <button onclick="nextSong()">⏩</button>
 <br>
 <button id="downloadBtn">⬇ Download</button>
-<button onclick="closePlayer()">❌ Close</button>
 </div>
 </div>
 
@@ -192,236 +169,17 @@ color:#aaa;
 <input id="titleInput" placeholder="Song Title">
 <input id="artistInput" placeholder="Artist">
 
-<input type="file" id="audioFile" accept="audio/*">
-<input type="file" id="coverFile" accept="image/*">
+<label>Audio File (music bucket)</label>
+<input type="file" id="audioFile">
+
+<label>Cover Image (cover bucket)</label>
+<input type="file" id="coverFile">
 
 <button onclick="uploadSong()">Upload</button>
 <button onclick="logout()">Logout</button>
 
-<!-- PROGRESS -->
-<div class="progressWrap">
-<div id="progressBar"></div>
-</div>
-<p id="progressText">0%</p>
-
+<progress id="progressBar" value="0" max="100"></progress>
 </div>
 
 <script>
-const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
-const SUPABASE_KEY = "sb_publishable_7zCr4dg-xaj7I7syGO685g_Fk_fIbFS";
-
-let songs = [];
-let current = 0;
-let playing = false;
-
-const audio = document.getElementById("audio");
-
-/* LOAD SONGS */
-async function loadSongs(){
-const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`,{
-headers:{
-apikey:SUPABASE_KEY,
-Authorization:`Bearer ${SUPABASE_KEY}`
-}
-});
-
-songs = await res.json();
-renderSongs(songs);
-}
-
-/* RENDER */
-function renderSongs(list){
-const box = document.getElementById("songList");
-box.innerHTML = "";
-
-list.forEach((song,i)=>{
-box.innerHTML += `
-<div class="song" onclick="openPlayer(${i})">
-<img src="${song.cover_url}">
-<div>
-<b>${song.title}</b><br>
-<small>${song.artist}</small>
-</div>
-</div>
-`;
-});
-}
-
-/* SEARCH */
-document.getElementById("searchBox").addEventListener("input",function(){
-const value = this.value.toLowerCase();
-
-const filtered = songs.filter(song =>
-song.title.toLowerCase().includes(value) ||
-(song.artist || "").toLowerCase().includes(value)
-);
-
-renderSongs(filtered);
-});
-
-/* PLAYER */
-function openPlayer(i){
-current = i;
-const song = songs[i];
-
-document.getElementById("cover").src = song.cover_url;
-document.getElementById("title").innerText = song.title;
-
-audio.src = song.audio_url;
-audio.play();
-
-playing = true;
-document.getElementById("playBtn").innerText = "⏸";
-
-document.getElementById("playerBox").style.display = "block";
-
-document.getElementById("downloadBtn").onclick = function(){
-window.open(song.audio_url);
-};
-}
-
-function togglePlay(){
-const btn = document.getElementById("playBtn");
-
-if(playing){
-audio.pause();
-btn.innerText = "▶️";
-playing = false;
-}else{
-audio.play();
-btn.innerText = "⏸";
-playing = true;
-}
-}
-
-function nextSong(){
-current++;
-if(current >= songs.length) current = 0;
-openPlayer(current);
-}
-
-function prevSong(){
-current--;
-if(current < 0) current = songs.length - 1;
-openPlayer(current);
-}
-
-function closePlayer(){
-document.getElementById("playerBox").style.display = "none";
-audio.pause();
-}
-
-/* ADMIN LOGIN */
-function adminLogin(){
-const user = document.getElementById("adminUser").value;
-const pass = document.getElementById("adminPass").value;
-
-if(user === "Lil Tezar" && pass === "Vini123##$$"){
-localStorage.setItem("admin","true");
-document.getElementById("adminLogin").style.display = "none";
-document.getElementById("adminPanel").style.display = "block";
-}else{
-document.getElementById("adminMsg").innerText = "Wrong login ❌";
-}
-}
-
-/* AUTO LOGIN */
-if(localStorage.getItem("admin") === "true"){
-document.getElementById("adminLogin").style.display = "none";
-document.getElementById("adminPanel").style.display = "block";
-}
-
-/* LOGOUT */
-function logout(){
-localStorage.removeItem("admin");
-location.reload();
-}
-
-/* UPLOAD WITH PROGRESS */
-async function uploadSong(){
-
-const title = document.getElementById("titleInput").value;
-const artist = document.getElementById("artistInput").value;
-
-const audioFile = document.getElementById("audioFile").files[0];
-const coverFile = document.getElementById("coverFile").files[0];
-
-if(!audioFile || !coverFile){
-alert("Select files first");
-return;
-}
-
-const progressBar = document.getElementById("progressBar");
-const progressText = document.getElementById("progressText");
-
-const audioName = Date.now() + "_" + audioFile.name;
-const coverName = Date.now() + "_" + coverFile.name;
-
-/* AUDIO */
-await new Promise(resolve=>{
-const xhr = new XMLHttpRequest();
-
-xhr.upload.onprogress = e=>{
-if(e.lengthComputable){
-let p = Math.round((e.loaded/e.total)*50);
-progressBar.style.width = p+"%";
-progressText.innerText = p+"%";
-}
-};
-
-xhr.onload = resolve;
-xhr.open("POST", `${SUPABASE_URL}/storage/v1/object/music/${audioName}`);
-xhr.setRequestHeader("apikey", SUPABASE_KEY);
-xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
-xhr.setRequestHeader("Content-Type", audioFile.type);
-xhr.send(audioFile);
-});
-
-/* COVER */
-await new Promise(resolve=>{
-const xhr = new XMLHttpRequest();
-
-xhr.upload.onprogress = e=>{
-if(e.lengthComputable){
-let p = 50 + Math.round((e.loaded/e.total)*50);
-progressBar.style.width = p+"%";
-progressText.innerText = p+"%";
-}
-};
-
-xhr.onload = resolve;
-xhr.open("POST", `${SUPABASE_URL}/storage/v1/object/cover/${coverName}`);
-xhr.setRequestHeader("apikey", SUPABASE_KEY);
-xhr.setRequestHeader("Authorization", `Bearer ${SUPABASE_KEY}`);
-xhr.setRequestHeader("Content-Type", coverFile.type);
-xhr.send(coverFile);
-});
-
-/* SAVE */
-await fetch(`${SUPABASE_URL}/rest/v1/songs`,{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-apikey:SUPABASE_KEY,
-Authorization:`Bearer ${SUPABASE_KEY}`
-},
-body:JSON.stringify({
-title,
-artist,
-audio_url:`${SUPABASE_URL}/storage/v1/object/public/music/${audioName}`,
-cover_url:`${SUPABASE_URL}/storage/v1/object/public/cover/${coverName}`
-})
-});
-
-progressBar.style.width="100%";
-progressText.innerText="Upload complete 🚀";
-
-setTimeout(()=>location.reload(),1000);
-}
-
-/* INIT */
-loadSongs();
-</script>
-
-</body>
-</html>
+const SUPABASE_URL =

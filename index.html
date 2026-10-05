@@ -43,6 +43,15 @@ border-radius:20px;
 text-decoration:none;
 }
 
+/* SEARCH */
+#searchBox{
+width:90%;
+margin:10px;
+padding:10px;
+border:none;
+border-radius:10px;
+}
+
 /* SONG LIST */
 .song{
 display:flex;
@@ -60,7 +69,7 @@ border-radius:10px;
 margin-right:10px;
 }
 
-/* PLAYER */
+/* PLAYER FULLSCREEN */
 #playerBox{
 display:none;
 position:fixed;
@@ -70,42 +79,27 @@ width:100%;
 height:100%;
 background:#000;
 z-index:999;
-padding:20px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
 text-align:center;
 }
 
 #playerBox img{
-width:200px;
+width:220px;
 border-radius:15px;
-margin-top:40px;
+margin-bottom:20px;
 }
 
 .controls button{
 background:#222;
 color:white;
 border:none;
-padding:10px;
+padding:12px;
 margin:5px;
 border-radius:10px;
-font-size:16px;
-}
-
-/* SEARCH */
-#searchBox{
-width:90%;
-margin:10px;
-padding:10px;
-border:none;
-border-radius:10px;
-}
-
-
-input{
-width:100%;
-padding:8px;
-margin-bottom:8px;
-border-radius:8px;
-border:none;
+font-size:18px;
 }
 </style>
 </head>
@@ -114,7 +108,6 @@ border:none;
 
 <!-- HEADER -->
 <div class="header">
-
 <div class="profile">
 <img src="profile.jpg">
 <div>
@@ -124,9 +117,8 @@ border:none;
 </div>
 
 <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank" class="subscribe">
-▶ Subscribe On YouTube 
+▶ Subscribe
 </a>
-
 </div>
 
 <!-- SEARCH -->
@@ -137,6 +129,11 @@ border:none;
 
 <!-- PLAYER -->
 <div id="playerBox">
+
+<!-- BACK BUTTON -->
+<div style="position:absolute;top:15px;left:15px;">
+<button onclick="goBack()">⬅️</button>
+</div>
 
 <img id="cover">
 <h3 id="title"></h3>
@@ -149,13 +146,9 @@ border:none;
 <button onclick="nextSong()">⏩</button>
 <br>
 <button id="downloadBtn">⬇ Download</button>
-<button onclick="closePlayer()">❌ Close</button>
 </div>
 
 </div>
-
-
-
 
 <script>
 const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
@@ -169,6 +162,7 @@ const audio = document.getElementById("audio");
 
 /* LOAD SONGS */
 async function loadSongs(){
+try{
 const res = await fetch(`${SUPABASE_URL}/rest/v1/songs?select=*`,{
 headers:{
 apikey:SUPABASE_KEY,
@@ -176,144 +170,104 @@ Authorization:`Bearer ${SUPABASE_KEY}`
 }
 });
 
-songs = await res.json();
-renderSongs(songs);
+const data = await res.json();
+
+if(!Array.isArray(data)){
+alert("Error loading songs");
+return;
 }
 
-/* RENDER */
+songs = data;
+
+if(songs.length === 0){
+songList.innerHTML = "<p style='padding:15px;'>No songs found</p>";
+return;
+}
+
+renderSongs(songs);
+
+}catch(err){
+console.log(err);
+alert("Failed to load songs");
+}
+}
+
+/* RENDER SONGS */
 function renderSongs(list){
-const box = document.getElementById("songList");
-box.innerHTML = "";
+songList.innerHTML = "";
 
 list.forEach((song,i)=>{
-box.innerHTML += `
+songList.innerHTML += `
 <div class="song" onclick="openPlayer(${i})">
 <img src="${song.cover_url}">
 <div>
 <b>${song.title}</b><br>
 <small>${song.artist}</small>
 </div>
-</div>
-`;
+</div>`;
 });
 }
 
 /* SEARCH */
-document.getElementById("searchBox").addEventListener("input",function(){
-const value = this.value.toLowerCase();
+searchBox.addEventListener("input",function(){
+const v = this.value.toLowerCase();
 
-const filtered = songs.filter(song =>
-song.title.toLowerCase().includes(value) ||
-(song.artist || "").toLowerCase().includes(value)
+renderSongs(
+songs.filter(s =>
+(s.title||"").toLowerCase().includes(v) ||
+(s.artist||"").toLowerCase().includes(v)
+)
 );
-
-renderSongs(filtered);
 });
 
-/* PLAYER */
+/* OPEN PLAYER */
 function openPlayer(i){
 current = i;
-
 const song = songs[i];
 
-document.getElementById("cover").src = song.cover_url;
-document.getElementById("title").innerText = song.title;
+cover.src = song.cover_url;
+title.innerText = song.title;
 
 audio.src = song.audio_url;
 audio.play();
 
 playing = true;
-document.getElementById("playBtn").innerText = "⏸";
+playBtn.innerText = "⏸";
 
-document.getElementById("playerBox").style.display = "block";
+playerBox.style.display = "flex";
 
-document.getElementById("downloadBtn").onclick = function(){
-window.open(song.audio_url);
-};
+downloadBtn.onclick = ()=>window.open(song.audio_url);
 }
 
-function togglePlay(){
-const btn = document.getElementById("playBtn");
+/* BACK */
+function goBack(){
+audio.pause();
+playerBox.style.display = "none";
+}
 
+/* PLAY/PAUSE */
+function togglePlay(){
 if(playing){
 audio.pause();
-btn.innerText = "▶️";
-playing = false;
+playBtn.innerText = "▶️";
+playing=false;
 }else{
 audio.play();
-btn.innerText = "⏸";
-playing = true;
+playBtn.innerText = "⏸";
+playing=true;
 }
 }
 
+/* NEXT */
 function nextSong(){
-current++;
-if(current >= songs.length) current = 0;
+current = (current+1)%songs.length;
 openPlayer(current);
 }
 
+/* PREVIOUS */
 function prevSong(){
-current--;
-if(current < 0) current = songs.length - 1;
+current = (current-1+songs.length)%songs.length;
 openPlayer(current);
-}
-
-function closePlayer(){
-document.getElementById("playerBox").style.display = "none";
-audio.pause();
-}
-
-/* ADMIN LOGIN */
-function adminLogin(){
-const user = document.getElementById("adminUser").value;
-const pass = document.getElementById("adminPass").value;
-
-if(user === "Lil Tezar" && pass === "Vini123##$$"){
-localStorage.setItem("admin","true");
-document.getElementById("adminLogin").style.display = "none";
-document.getElementById("adminPanel").style.display = "block";
-}else{
-document.getElementById("adminMsg").innerText = "Wrong login ❌";
-}
-}
-
-/* AUTO LOGIN */
-if(localStorage.getItem("admin") === "true"){
-document.getElementById("adminLogin").style.display = "none";
-document.getElementById("adminPanel").style.display = "block";
-}
-
-/* LOGOUT */
-function logout(){
-localStorage.removeItem("admin");
-location.reload();
-}
-
-/* UPLOAD */
-async function uploadSong(){
-
-const title = document.getElementById("titleInput").value;
-const artist = document.getElementById("artistInput").value;
-const audio_url = document.getElementById("audioInput").value;
-const cover_url = document.getElementById("coverInput").value;
-
-await fetch(`${SUPABASE_URL}/rest/v1/songs`,{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-apikey:SUPABASE_KEY,
-Authorization:`Bearer ${SUPABASE_KEY}`
-},
-body:JSON.stringify({
-title,
-artist,
-audio_url,
-cover_url
-})
-});
-
-alert("Uploaded ✅");
-location.reload();
 }
 
 /* INIT */
@@ -321,4 +275,4 @@ loadSongs();
 </script>
 
 </body>
-  </html>
+</html>

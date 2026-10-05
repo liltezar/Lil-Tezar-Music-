@@ -99,10 +99,6 @@ border:none;
 border-radius:10px;
 }
 
-/* ADMIN */
-#adminLogin, #adminPanel{
-padding:15px;
-}
 
 input{
 width:100%;
@@ -128,7 +124,7 @@ border:none;
 </div>
 
 <a href="https://www.youtube.com/@LILTEZAR-artist" target="_blank" class="subscribe">
-▶ Subscribe
+▶ Subscribe On YouTube 
 </a>
 
 </div>
@@ -158,27 +154,8 @@ border:none;
 
 </div>
 
-<!-- ADMIN LOGIN -->
-<div id="adminLogin">
-<h3>Admin Login</h3>
-<input id="adminUser" placeholder="Username">
-<input id="adminPass" type="password" placeholder="Password">
-<button onclick="adminLogin()">Login</button>
-<p id="adminMsg"></p>
-</div>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel" style="display:none;">
-<h3>Upload Song</h3>
 
-<input id="titleInput" placeholder="Song Title">
-<input id="artistInput" placeholder="Artist">
-<input id="audioInput" placeholder="Audio URL">
-<input id="coverInput" placeholder="Cover URL">
-
-<button onclick="uploadSong()">Upload</button>
-<button onclick="logout()">Logout</button>
-</div>
 
 <script>
 const SUPABASE_URL = "https://ujuwvkzzxiwqcfhptaup.supabase.co";
